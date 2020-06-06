@@ -373,11 +373,9 @@ class ReturnToIndex extends React.Component {
                 fontSize: "large",
                 backgroundColor: "#DDD",
             }}>
-                <center>
-                    <AnchorLink href={`#indexOfVocabLists`}>
-                        {"▲ Return to the index ▲"}
-                    </AnchorLink>
-                </center>
+                <AnchorLink href={`#indexOfVocabLists`}>
+                    {"▲ Return to the index ▲"}
+                </AnchorLink>
             </div>
         );
     }
