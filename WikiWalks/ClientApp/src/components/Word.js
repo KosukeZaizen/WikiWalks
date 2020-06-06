@@ -321,13 +321,6 @@ class ReturnToIndex extends React.Component {
         }
     }
 
-    componentDidUpdate(preciousProps) {
-        if ((preciousProps.refForReturnToIndex && preciousProps.refForReturnToIndex.current)
-            !== (this.props.refForReturnToIndex && this.props.refForReturnToIndex.current)) {
-            this.judge();
-        }
-    }
-
     componentWillUnmount() {
         window.removeEventListener('scroll', this.judge);
     }
@@ -339,7 +332,7 @@ class ReturnToIndex extends React.Component {
 
         const height = window.innerHeight;
 
-        const offsetY = elem.getBoundingClientRect().top + 300;
+        const offsetY = elem.getBoundingClientRect().top + 700;
         const t_position = offsetY - height;
 
         if (t_position >= 0) {
