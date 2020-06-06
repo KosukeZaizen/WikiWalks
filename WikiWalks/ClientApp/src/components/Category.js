@@ -10,7 +10,7 @@ class Category extends Component {
     constructor(props) {
         super(props);
 
-        const category = this.props.match.params.category.split("_").join(" ");
+        const category = decodeURIComponent(this.props.match.params.category.split("_").join(" "));
         this.state = {
             pages: [],
             category,
@@ -20,7 +20,7 @@ class Category extends Component {
     componentDidMount() {
         const getData = async () => {
             try {
-                const url = `api/WikiWalks/getWordsForCategory?category=${this.state.category}`;
+                const url = `api/WikiWalks/getWordsForCategory?category=${encodeURIComponent(this.state.category)}`;
                 const response = await fetch(url);
                 const pages = await response.json();
 

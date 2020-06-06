@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { actionCreators } from '../store/WikiWalks';
 import Head from './Helmet';
 import AnchorLink from 'react-anchor-link-smooth-scroll';
+import { Button } from 'reactstrap';
 
 class PagesForTheTitles extends Component {
     componentDidMount() {
@@ -33,7 +34,7 @@ class PagesForTheTitles extends Component {
         const word = this.props.pages.word || "";
         const cat = categories && categories.sort((c1, c2) => c2.cnt - c1.cnt)[0];
         const category = cat && cat.category;
-        const categoryForUrl = category && category.split(" ").join("_");
+        const categoryForUrl = category && encodeURIComponent(category.split(" ").join("_"));
         const description = `This is a list of the Wikipedia pages about "${word}". Please check the list below to learn about "${word}"!`;
         const arrDesc = description.split(". ");
         const lineChangeDesc = arrDesc.map((d, i) => <span key={i}>{d}{i < arrDesc.length - 1 && ". "}<br /></span>);
@@ -122,10 +123,10 @@ class PagesForTheTitles extends Component {
 function renderTable(props) {
     const { pages, wordId, word } = props.pages;
     return (
-        <table className='table table-striped'>
+        <table className='table table-striped' style={{ wordBreak: "break-all" }}>
             <thead>
                 <tr>
-                    <th>Page Title</th>
+                    <th style={{ minWidth: 120 }}>Page Title</th>
                     <th>Snippet</th>
                 </tr>
             </thead>
@@ -142,53 +143,67 @@ function renderTable(props) {
                                 return 0;
                             }
                         })
-                        .map((page, i) => (
-                            <tr key={i}>
-                                <td>
-                                    {page.wordId !== wordId && page.referenceCount > 4 ? <Link to={"/word/" + page.wordId}>{page.word}</Link> : page.word}
-                                </td>
-                                <td>
-                                    {page.snippet.split(" ").map((s, j) => {
-                                        const patterns = {
-                                            '&lt;': '<',
-                                            '&gt;': '>',
-                                            '&amp;': '&',
-                                            '&quot;': '"',
-                                            '&#x27;': '\'',
-                                            '&#x60;': '`'
-                                        };
-                                        Object.keys(patterns).forEach(k => { s = s.split(k).join(patterns[k]) });
-                                        const symbol = j === 0 ? "" : " ";
-                                        const words = props.pages.word.split(" ");
-                                        if (words.some(w => w.toLowerCase() === s.toLowerCase())) {
-                                            return <React.Fragment key={j}>{symbol}<b>{s}</b></React.Fragment>;
-                                        } else if (words.some(w => (w.toLowerCase() + ",") === s.toLowerCase())) {
-                                            return <React.Fragment key={j}>{symbol}<b>{s.slice(0, -1)}</b>,</React.Fragment>;
-                                        } else if (words.some(w => (w.toLowerCase() + ",\"") === s.toLowerCase())) {
-                                            return <React.Fragment key={j}>{symbol}<b>{s.slice(0, -1)}</b>{",\""}</React.Fragment>;
-                                        } else if (words.some(w => (w.toLowerCase() + ".") === s.toLowerCase())) {
-                                            return <React.Fragment key={j}>{symbol}<b>{s.slice(0, -1)}</b>.</React.Fragment>;
-                                        } else if (words.some(w => (w.toLowerCase() + ")") === s.toLowerCase())) {
-                                            return <React.Fragment key={j}>{symbol}<b>{s.slice(0, -1)}</b>{")"}</React.Fragment>;
-                                        } else if (words.some(w => (w.toLowerCase() + "\"") === s.toLowerCase())) {
-                                            return <React.Fragment key={j}>{symbol}<b>{s.slice(0, -1)}</b>{"\""}</React.Fragment>;
-                                        } else if (words.some(w => ("(" + w.toLowerCase()) === s.toLowerCase())) {
-                                            return <React.Fragment key={j}>{symbol}{"("}<b>{s.substr(1)}</b></React.Fragment>;
-                                        } else if (words.some(w => ("\"" + w.toLowerCase()) === s.toLowerCase())) {
-                                            return <React.Fragment key={j}>{symbol}{"\""}<b>{s.substr(1)}</b></React.Fragment>;
-                                        } else if (words.some(w => ("\"\"" + w.toLowerCase()) === s.toLowerCase())) {
-                                            return <React.Fragment key={j}>{symbol}{"\"\""}<b>{s.substr(1)}</b></React.Fragment>;
-                                        } else {
-                                            return <React.Fragment key={j}>{symbol}{s}</React.Fragment>;
-                                        }
-                                    })}
-                                    <br />
-                                    <a href={"https://en.wikipedia.org/wiki/" + page.word.split(" ").join("_")} target="_blank" rel="noopener noreferrer">
-                                        {"Check the Wikipedia page for " + page.word + " >>"}
-                                    </a>
-                                </td>
-                            </tr>
-                        ))
+                        .map((page, i) => {
+                            const inlineWords = page.word.split(" ").map((w, j) => {
+                                return <React.Fragment key={j}>{j !== 0 && " "}<span style={{ display: "inline-block" }}>{w}</span></React.Fragment>;
+                            });
+                            return (
+                                <tr key={i}>
+                                    <td style={{ fontWeight: "bold" }}>
+                                        {page.wordId !== wordId && page.referenceCount > 4 ? <Link to={"/word/" + page.wordId}>{inlineWords}</Link> : inlineWords}
+                                    </td>
+                                    <td>
+                                        {page.snippet.split(" ").map((s, j) => {
+                                            const patterns = {
+                                                '&lt;': '<',
+                                                '&gt;': '>',
+                                                '&amp;': '&',
+                                                '&quot;': '"',
+                                                '&#x27;': '\'',
+                                                '&#x60;': '`'
+                                            };
+                                            Object.keys(patterns).forEach(k => { s = s.split(k).join(patterns[k]) });
+                                            const symbol = j === 0 ? "" : " ";
+                                            const words = props.pages.word.split(" ");
+                                            if (words.some(w => w.toLowerCase() === s.toLowerCase())) {
+                                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s}</span></React.Fragment>;
+                                            } else if (words.some(w => (w.toLowerCase() + ",") === s.toLowerCase())) {
+                                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.slice(0, -1)}</span>,</React.Fragment>;
+                                            } else if (words.some(w => (w.toLowerCase() + ",\"") === s.toLowerCase())) {
+                                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.slice(0, -1)}</span>{",\""}</React.Fragment>;
+                                            } else if (words.some(w => (w.toLowerCase() + ".") === s.toLowerCase())) {
+                                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.slice(0, -1)}</span>.</React.Fragment>;
+                                            } else if (words.some(w => (w.toLowerCase() + ")") === s.toLowerCase())) {
+                                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.slice(0, -1)}</span>{")"}</React.Fragment>;
+                                            } else if (words.some(w => (w.toLowerCase() + "\"") === s.toLowerCase())) {
+                                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.slice(0, -1)}</span>{"\""}</React.Fragment>;
+                                            } else if (words.some(w => ("(" + w.toLowerCase()) === s.toLowerCase())) {
+                                                return <React.Fragment key={j}>{symbol}{"("}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.substr(1)}</span></React.Fragment>;
+                                            } else if (words.some(w => ("\"" + w.toLowerCase()) === s.toLowerCase())) {
+                                                return <React.Fragment key={j}>{symbol}{"\""}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.substr(1)}</span></React.Fragment>;
+                                            } else if (words.some(w => ("\"\"" + w.toLowerCase()) === s.toLowerCase())) {
+                                                return <React.Fragment key={j}>{symbol}{"\"\""}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.substr(1)}</span></React.Fragment>;
+                                            } else {
+                                                return <React.Fragment key={j}>{symbol}<span style={{ display: "inline-block" }}>{s}</span></React.Fragment>;
+                                            }
+                                        })}
+                                        <br />
+                                        <Button
+                                            size="sm"
+                                            color="dark"
+                                            href={"https://en.wikipedia.org/wiki/" + page.word.split(" ").join("_")}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{ marginTop: 7 }}
+                                        >
+                                            {`Check the Wikipedia page for ${page.word}`.split(" ").map((w, j) => {
+                                                return <React.Fragment key={j}>{j !== 0 && " "}<span style={{ display: "inline-block" }}>{w}</span></React.Fragment>;
+                                            })}
+                                        </Button>
+                                    </td>
+                                </tr>
+                            );
+                        })
                     :
                     <tr><td>Loading...</td><td></td></tr>}
             </tbody>
@@ -217,7 +232,7 @@ class RenderOtherTable extends Component {
     }
 
     fetchData = async () => {
-        const url = `api/WikiWalks/getWordsForCategory?category=${this.props.c.category}`;
+        const url = `api/WikiWalks/getWordsForCategory?category=${encodeURIComponent(this.props.c.category)}`;
         const response = await fetch(url);
         const pages = await response.json();
         this.setState({ pages });
@@ -229,28 +244,42 @@ class RenderOtherTable extends Component {
         return (<React.Fragment>
             <hr />
             <h2 id={c.category}>{c.category}</h2>
-            <table className='table table-striped'>
+            <table className='table table-striped' style={{ wordBreak: "break-all" }}>
                 <thead>
                     <tr>
-                        <th>Page Title</th>
+                        <th style={{ minWidth: 120 }}>Page Title</th>
                         <th>Snippet</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {pages.length > 0 ? pages.map(page =>
-                        <tr key={page.wordId}>
-                            <td>
-                                {(page.wordId !== wordId && page.referenceCount > 4) ? <Link to={"/word/" + page.wordId}>{page.word}</Link> : page.word}
-                            </td>
-                            <td>
-                                {page.snippet}
-                                <br />
-                                <a href={"https://en.wikipedia.org/wiki/" + page.word.split(" ").join("_")} target="_blank" rel="noopener noreferrer">
-                                    {"Check the Wikipedia page for " + page.word + " >>"}
-                                </a>
-                            </td>
-                        </tr>
-                    )
+                    {pages.length > 0 ? pages.map(page => {
+                        const inlineWords = page.word.split(" ").map((w, j) => {
+                            return <React.Fragment key={j}>{j !== 0 && " "}<span style={{ display: "inline-block" }}>{w}</span></React.Fragment>;
+                        });
+                        return (
+                            <tr key={page.wordId}>
+                                <td style={{ fontWeight: "bold" }}>
+                                    {(page.wordId !== wordId && page.referenceCount > 4) ? <Link to={"/word/" + page.wordId}>{inlineWords}</Link> : inlineWords}
+                                </td>
+                                <td>
+                                    {page.snippet}
+                                    <br />
+                                    <Button
+                                        size="sm"
+                                        color="dark"
+                                        href={"https://en.wikipedia.org/wiki/" + page.word.split(" ").join("_")}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ marginTop: 7 }}
+                                    >
+                                        {`Check the Wikipedia page for ${page.word}`.split(" ").map((w, j) => {
+                                            return <React.Fragment key={j}>{j !== 0 && " "}<span style={{ display: "inline-block" }}>{w}</span></React.Fragment>;
+                                        })}
+                                    </Button>
+                                </td>
+                            </tr>
+                        );
+                    })
                         :
                         <tr><td>Loading...</td><td></td></tr>}
                 </tbody>

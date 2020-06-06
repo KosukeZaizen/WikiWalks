@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Text;
+using System.Web;
 
 namespace WikiWalks
 {
@@ -80,7 +81,7 @@ namespace WikiWalks
                     foreach (var category in allCategories)
                     {
                         var dic2 = new Dictionary<string, string>();
-                        dic2["loc"] = domain + "/category/" + category.Replace(" ", "_");
+                        dic2["loc"] = domain + "/category/" + HttpUtility.UrlEncode(category.Replace(" ", "_"));
                         lstSitemap.Add(dic2);
                     }
 
@@ -89,7 +90,7 @@ namespace WikiWalks
                     foreach (var wordId in allWordId)
                     {
                         var dicWordId = new Dictionary<string, string>();
-                        dicWordId["loc"] = domain + "/word/" + wordId;
+                        dicWordId["loc"] = domain + "/word/" + HttpUtility.UrlEncode(wordId.ToString());
                         lstSitemap.Add(dicWordId);
                     }
 

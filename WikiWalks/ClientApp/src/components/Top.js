@@ -52,7 +52,7 @@ class Top extends Component {
                         {categories.length > 0 ? categories.map(category =>
                             <tr key={category.category}>
                                 <td>
-                                    {<Link to={"/category/" + category.category.split(" ").join("_")}>{category.category}</Link>}
+                                    {<Link to={"/category/" + encodeURIComponent(category.category.split(" ").join("_"))}>{category.category}</Link>}
                                 </td>
                                 <td>
                                     {category.cnt} Keywords
