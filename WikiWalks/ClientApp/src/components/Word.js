@@ -262,7 +262,9 @@ class RenderOtherTable extends Component {
                                     {(page.wordId !== wordId && page.referenceCount > 4) ? <Link to={"/word/" + page.wordId}>{inlineWords}</Link> : inlineWords}
                                 </td>
                                 <td>
-                                    {page.snippet}
+                                    {page.snippet.split(" ").map((w, j) => {
+                                        return <React.Fragment key={j}>{j !== 0 && " "}<span style={{ display: "inline-block" }}>{w}</span></React.Fragment>;
+                                    })}
                                     <br />
                                     <Button
                                         size="sm"
