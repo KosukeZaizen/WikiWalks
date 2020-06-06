@@ -8,6 +8,7 @@ import AnchorLink from 'react-anchor-link-smooth-scroll';
 import { Button } from 'reactstrap';
 
 class PagesForTheTitles extends Component {
+
     componentDidMount() {
         // This method is called when the component is first added to the document
         this.fetchData();
@@ -88,6 +89,7 @@ class PagesForTheTitles extends Component {
                 <h1>{word}</h1>
                 <br />
                 {lineChangeDesc}
+                <span id="indexOfVocabLists"></span>
                 <br />
                 {
                     categories && categories.length > 0 &&
@@ -115,6 +117,16 @@ class PagesForTheTitles extends Component {
                         wordId={wordId}
                     />
                 ))}
+                {
+                    categories && categories.length > 0 &&
+                    <React.Fragment>
+                        <ReturnToIndex
+                            refForReturnToIndex={this.refForReturnToIndex}
+                            criteriaId={`Pages about ${word}`}
+                        />
+                        <div style={{ height: "50px" }}></div>
+                    </React.Fragment>
+                }
             </div>
         );
     }
@@ -287,6 +299,87 @@ class RenderOtherTable extends Component {
                 </tbody>
             </table>
         </React.Fragment>);
+    }
+}
+
+class ReturnToIndex extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            showReturnToIndex: false,
+        }
+
+        window.addEventListener('scroll', this.judge);
+    }
+
+    componentDidMount() {
+        for (let i = 0; i < 5; i++) {
+            setTimeout(() => {
+                this.judge();
+            }, i * 1000);
+        }
+    }
+
+    componentDidUpdate(preciousProps) {
+        if ((preciousProps.refForReturnToIndex && preciousProps.refForReturnToIndex.current)
+            !== (this.props.refForReturnToIndex && this.props.refForReturnToIndex.current)) {
+            this.judge();
+        }
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('scroll', this.judge);
+    }
+
+    judge = () => {
+        const { criteriaId } = this.props;
+        const elem = document.getElementById(criteriaId);
+        if (!elem) return;
+
+        const height = window.innerHeight;
+
+        const offsetY = elem.getBoundingClientRect().top + 300;
+        const t_position = offsetY - height;
+
+        if (t_position >= 0) {
+            // 上側の時
+            this.setState({
+                showReturnToIndex: false,
+            });
+        } else {
+            // 下側の時
+            this.setState({
+                showReturnToIndex: true,
+            });
+        }
+    }
+
+    render() {
+        const { showReturnToIndex } = this.state;
+        return (
+            <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "fixed",
+                bottom: 0,
+                left: 0,
+                zIndex: showReturnToIndex ? 99999900 : 0,
+                width: window.innerWidth,
+                height: "40px",
+                opacity: showReturnToIndex ? 1.0 : 0,
+                transition: "all 2s ease",
+                fontSize: "large",
+                backgroundColor: "#DDD",
+            }}>
+                <center>
+                <AnchorLink href={`#indexOfVocabLists`}>
+                    {"▲ Return to the index ▲"}
+                </AnchorLink>
+                </center>
+            </div>
+        );
     }
 }
 
