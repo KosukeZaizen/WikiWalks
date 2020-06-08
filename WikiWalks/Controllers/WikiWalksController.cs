@@ -47,7 +47,10 @@ order by cnt desc;
             var pages = new List<Page>();
 
             string sql = @"
-select wordsForCategory.wordId, wordsForCategory.word, max(wr.snippet) as snippet, count(wr.targetWordId) as cnt from
+select wordsForCategory.wordId, wordsForCategory.word, 
+max(case when wr.targetWordId = wr.sourceWordId then wr.snippet else ' ' + wr.snippet end) as snippet, 
+count(wr.targetWordId) as cnt 
+from
 (
 select c.wordId, w.word
 from category as c 
