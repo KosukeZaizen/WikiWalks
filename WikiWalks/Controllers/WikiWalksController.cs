@@ -47,9 +47,9 @@ order by cnt desc;
             var pages = new List<Page>();
 
             string sql = @"
-select wordsForCategory.wordId, wordsForCategory.word, wordsForCategory.snippet, count(wr.targetWordId) as cnt from
+select wordsForCategory.wordId, wordsForCategory.word, max(wr.snippet) as snippet, count(wr.targetWordId) as cnt from
 (
-select c.wordId, w.word, w.snippet 
+select c.wordId, w.word
 from category as c 
 inner join word as w 
 on c.wordId = w.wordId 
@@ -57,7 +57,7 @@ and c.category like @category
 ) as wordsForCategory
 left outer join WordReference as wr
 on wordsForCategory.wordId = wr.targetWordId
-group by wordsForCategory.wordId, wordsForCategory.word, wordsForCategory.snippet
+group by wordsForCategory.wordId, wordsForCategory.word
 order by cnt desc
 ;";
 
@@ -90,9 +90,10 @@ order by cnt desc
             string word = (string)result1.FirstOrDefault()["word"];
 
             var result2 = con.ExecuteSelect(@"
-select firstRef.sourceWordId, firstRef.word, firstRef.snippet, count(wwrr.targetWordId) as cnt from WordReference as wwrr
+select firstRef.sourceWordId, firstRef.word, firstRef.snippet, count(wwrr.targetWordId) as cnt 
+from WordReference as wwrr
 right outer join (
-select wr.sourceWordId, w.word, w.snippet 
+select wr.sourceWordId, w.word, wr.snippet 
 from WordReference as wr 
 inner join word as w 
 on wr.sourceWordId = w.wordId 
@@ -100,7 +101,7 @@ and targetWordId = @wordId
 ) as firstRef
 on firstRef.sourceWordId = wwrr.targetWordId
 group by firstRef.sourceWordId, firstRef.word, firstRef.snippet
-order by cnt desc
+order by cnt desc;
 ", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
 
             result2.ForEach((e) =>
