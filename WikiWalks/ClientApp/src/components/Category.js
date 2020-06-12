@@ -10,7 +10,15 @@ class Category extends Component {
     constructor(props) {
         super(props);
 
-        const category = decodeURIComponent(this.props.match.params.category.split("_").join(" "));
+        const originalCategory = this.props.match.params.category;
+        const encodedCategory = originalCategory.split(",").join("%2C");
+        if (originalCategory !== encodedCategory) {
+            //If the comma was not encoded, use encoded URL to prevent the duplication of the pages
+            window.location.href = `/category/${encodedCategory}`;
+        }
+
+        const category = decodeURIComponent(originalCategory.split("_").join(" "));
+
         this.state = {
             pages: [],
             category,
