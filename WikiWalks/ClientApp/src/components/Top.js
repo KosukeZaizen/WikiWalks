@@ -55,7 +55,7 @@ class Top extends Component {
                                     {<Link to={"/category/" + encodeURIComponent(category.category.split(" ").join("_"))}>{category.category}</Link>}
                                 </td>
                                 <td>
-                                    {category.cnt} Keywords
+                                    {category.cnt} keywords
                                 </td>
                             </tr>
                         )
