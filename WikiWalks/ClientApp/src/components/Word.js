@@ -20,9 +20,7 @@ class PagesForTheTitles extends Component {
     }
 
     componentDidUpdate(previousProps) {
-        const pagesLoaded = previousProps.pages.length <= 0 && this.props.pages[0] && this.props.pages[0].publishDate;
-        const changedTheme = previousProps.location !== this.props.location;
-        if (pagesLoaded || changedTheme) {
+        if (previousProps.location !== this.props.location) {
             this.fetchData();
         }
     }
@@ -47,7 +45,7 @@ class PagesForTheTitles extends Component {
                     title={word}
                     desc={description}
                 />
-                {<div className="breadcrumbs" itemScope itemType="https://schema.org/BreadcrumbList" style={{ textAlign: "left" }}>
+                <div className="breadcrumbs" itemScope itemType="https://schema.org/BreadcrumbList" style={{ textAlign: "left" }}>
                     <span itemProp="itemListElement" itemScope itemType="http://schema.org/ListItem">
                         <Link to="/" itemProp="item" style={{ marginRight: "5px", marginLeft: "5px" }}>
                             <span itemProp="name">
@@ -84,7 +82,7 @@ class PagesForTheTitles extends Component {
                         </span>
                         <meta itemProp="position" content="3" />
                     </span>
-                </div>}
+                </div>
                 <hr />
                 <h1>{word}</h1>
                 <br />
