@@ -122,11 +122,14 @@ order by cnt desc;
             var result3 = con.ExecuteSelect(@"
 select category, count(*) as cnt 
 from (
-	select wordId, category, count(*) as cnt1 from Category as c 
+	select wordId, category, count(*) as cnt1 from 
+	(
+	select wordId, category from Category where category in (select category from Category where wordId = @wordId)
+	) as c 
 	inner join WordReference as r 
 	on c.wordId = r.targetWordId 
 	group by wordId, category
-	having category in (select distinct category  from category where wordId = @wordId) and count(*) > 4
+	having count(*) > 4
 ) as rel
 group by category
 order by cnt desc;
