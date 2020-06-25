@@ -17,16 +17,9 @@ namespace RelatedPages.Controllers
             var l = new List<object>();
 
             var result = con.ExecuteSelect(@"
-select category, count(*) as cnt 
-from (
-	select category from Category as c 
-	inner join WordReference as r 
-	on c.wordId = r.targetWordId 
-	group by wordId, category
-	having count(*) > 4
-) as rel
-group by category 
-order by cnt desc;
+select category, count(*) as cnt from Category C
+where exists (select targetWordId from WordReference W where W.targetWordId = C.wordId group by targetWordId having count(targetWordId) > 4)
+group by category;
 ");
 
             result.ForEach((e) =>
@@ -124,7 +117,7 @@ select category, count(*) as cnt
 from (
 	select wordId, category, count(*) as cnt1 from 
 	(
-	select wordId, category from Category where category in (select category from Category where wordId = @wordId)
+	select wordId, category from Category A where exists (select * from Category B where A.category = B.category and wordId = @wordId)
 	) as c 
 	inner join WordReference as r 
 	on c.wordId = r.targetWordId 
@@ -153,11 +146,11 @@ order by cnt desc;
             var pages = new List<Page>();
 
             string sql = @"
-select w.wordId, w.word, count(*) as cnt from word as w
-inner join WordReference as wr
+select w.wordId, w.word, wr.cnt from Word as w
+inner join (
+select targetWordId, count(targetWordId) cnt from WordReference group by targetWordId having count(targetWordId) > 4
+) as wr
 on w.wordId = wr.targetWordId
-group by w.wordId, w.word
-having count(*) > 4
 order by cnt desc;
 ";
 
