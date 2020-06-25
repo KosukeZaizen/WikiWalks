@@ -4,34 +4,32 @@ using System.Data;
 using Microsoft.AspNetCore.Mvc;
 using RelatedPages.Models;
 using System.Linq;
+using WikiWalks;
 
 namespace RelatedPages.Controllers
 {
     [Route("api/[controller]")]
     public class WikiWalksController : Controller
     {
+        private readonly AllWorsGetter allWorsGetter;
+        private readonly AllCategoriesGetter allCategoriesGetter;
+
+        public WikiWalksController(AllWorsGetter allWorsGetter, AllCategoriesGetter allCategoriesGetter)
+        {
+            this.allWorsGetter = allWorsGetter;
+            this.allCategoriesGetter = allCategoriesGetter;
+        }
+
+        [HttpGet("[action]")]
+        public IEnumerable<Page> getAllWords()
+        {
+            return allWorsGetter.getPages();
+        }
+
         [HttpGet("[action]")]
         public IEnumerable<object> getAllCategories()
         {
-            var con = new DBCon();
-            var l = new List<object>();
-
-            var result = con.ExecuteSelect(@"
-select category, count(*) as cnt from Category C
-where exists (select targetWordId from WordReference W where W.targetWordId = C.wordId group by targetWordId having count(targetWordId) > 4)
-group by category
-order by cnt desc;
-");
-
-            result.ForEach((e) =>
-            {
-                var category = (string)e["category"];
-                var cnt = (int)e["cnt"];
-
-                l.Add(new { category, cnt });
-            });
-
-            return l;
+            return allCategoriesGetter.getCategories();
         }
 
         [HttpGet("[action]")]
@@ -138,36 +136,6 @@ order by cnt desc;
             });
 
             return new { wordId, word, pages, categories };
-        }
-
-        [HttpGet("[action]")]
-        public IEnumerable<Page> getAllWords()
-        {
-            var con = new DBCon();
-            var pages = new List<Page>();
-
-            string sql = @"
-select w.wordId, w.word, wr.cnt from Word as w
-inner join (
-select targetWordId, count(targetWordId) cnt from WordReference group by targetWordId having count(targetWordId) > 4
-) as wr
-on w.wordId = wr.targetWordId
-order by cnt desc;
-";
-
-            var result = con.ExecuteSelect(sql);
-
-            result.ForEach((e) =>
-            {
-                var page = new Page();
-                page.wordId = (int)e["wordId"];
-                page.word = (string)e["word"];
-                page.referenceCount = (int)e["cnt"];
-
-                pages.Add(page);
-            });
-
-            return pages;
         }
     }
 }

@@ -35,6 +35,12 @@ namespace WikiWalks
             {
                 configuration.RootPath = "ClientApp/build";
             });
+
+            var allWorsGetter = new AllWorsGetter();
+            services.AddSingleton(allWorsGetter);
+
+            var allCategoriesGetter = new AllCategoriesGetter();
+            services.AddSingleton(allCategoriesGetter);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -201,5 +207,109 @@ order by cnt desc;
             return pages;
         }
 
+    }
+
+    public class AllWorsGetter
+    {
+        private IEnumerable<Page> pages;
+        private readonly DBCon con;
+        public AllWorsGetter()
+        {
+            pages = new List<Page>();
+            con = new DBCon();
+
+            setAllPages();
+
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    await Task.Delay(1000 * 60 * 5);
+                    setAllPages();
+                }
+            });
+        }
+
+        public IEnumerable<Page> getPages()
+        {
+            return pages;
+        }
+
+        private void setAllPages()
+        {
+            var allPages = new List<Page>();
+
+            string sql = @"
+select w.wordId, w.word, wr.cnt from Word as w
+inner join (
+select targetWordId, count(targetWordId) cnt from WordReference group by targetWordId having count(targetWordId) > 4
+) as wr
+on w.wordId = wr.targetWordId
+order by cnt desc;
+";
+
+            var result = con.ExecuteSelect(sql);
+
+            result.ForEach((e) =>
+            {
+                var page = new Page();
+                page.wordId = (int)e["wordId"];
+                page.word = (string)e["word"];
+                page.referenceCount = (int)e["cnt"];
+
+                allPages.Add(page);
+            });
+
+            pages = allPages;
+        }
+    }
+
+    public class AllCategoriesGetter
+    {
+        private IEnumerable<object> categories;
+        private readonly DBCon con;
+        public AllCategoriesGetter()
+        {
+            categories = new List<object>();
+            con = new DBCon();
+
+            setAllCategories();
+
+            Task.Run(async () =>
+            {
+                while (true)
+                {
+                    await Task.Delay(1000 * 60 * 5);
+                    setAllCategories();
+                }
+            });
+        }
+
+        public IEnumerable<object> getCategories()
+        {
+            return categories;
+        }
+
+        private void setAllCategories()
+        {
+            var l = new List<object>();
+
+            var result = con.ExecuteSelect(@"
+select category, count(*) as cnt from Category C
+where exists (select targetWordId from WordReference W where W.targetWordId = C.wordId group by targetWordId having count(targetWordId) > 4)
+group by category
+order by cnt desc;
+");
+
+            result.ForEach((e) =>
+            {
+                var category = (string)e["category"];
+                var cnt = (int)e["cnt"];
+
+                l.Add(new { category, cnt });
+            });
+
+            categories = l;
+        }
     }
 }
