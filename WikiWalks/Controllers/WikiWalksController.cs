@@ -19,10 +19,10 @@ namespace RelatedPages.Controllers
             var result = con.ExecuteSelect(@"
 select category, count(*) as cnt 
 from (
-	select wordId, category, count(*) as cnt1 from Category as c 
+	select c.category from Category as c 
 	inner join WordReference as r 
 	on c.wordId = r.targetWordId 
-	group by wordId, category
+	group by c.wordId, c.category
 	having count(*) > 4
 ) as rel
 group by category 
