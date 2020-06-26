@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Text;
 using System.Web;
+using System;
 
 namespace WikiWalks
 {
@@ -212,22 +213,24 @@ order by cnt desc;
     public class AllWorsGetter
     {
         private IEnumerable<Page> pages;
-        private readonly DBCon con;
         public AllWorsGetter()
         {
             pages = new List<Page>();
-            con = new DBCon();
-
-            setAllPages();
 
             Task.Run(async () =>
             {
                 while (true)
                 {
-                    await Task.Delay(1000 * 60 * 5);
-                    setAllPages();
+                    try
+                    {
+                        await Task.Delay(1000 * 60 * 10);
+                        setAllPages();
+                    }
+                    catch (Exception ex) { }
                 }
             });
+
+            setAllPages();
         }
 
         public IEnumerable<Page> getPages()
@@ -237,6 +240,7 @@ order by cnt desc;
 
         private void setAllPages()
         {
+            var con = new DBCon();
             var allPages = new List<Page>();
 
             string sql = @"
@@ -267,22 +271,24 @@ order by cnt desc;
     public class AllCategoriesGetter
     {
         private IEnumerable<object> categories;
-        private readonly DBCon con;
         public AllCategoriesGetter()
         {
             categories = new List<object>();
-            con = new DBCon();
-
-            setAllCategories();
 
             Task.Run(async () =>
             {
                 while (true)
                 {
-                    await Task.Delay(1000 * 60 * 5);
-                    setAllCategories();
+                    try
+                    {
+                        await Task.Delay(1000 * 60 * 10);
+                        setAllCategories();
+                    }
+                    catch (Exception ex) { }
                 }
             });
+
+            setAllCategories();
         }
 
         public IEnumerable<object> getCategories()
@@ -292,6 +298,7 @@ order by cnt desc;
 
         private void setAllCategories()
         {
+            var con = new DBCon();
             var l = new List<object>();
 
             var result = con.ExecuteSelect(@"
