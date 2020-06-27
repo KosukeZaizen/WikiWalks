@@ -78,34 +78,28 @@ order by cnt desc
         {
             if (wordId <= 0) return new { };
 
-            Task<string> wordTask = Task.Run(() =>
-            {
-                var con = new DBCon();
-                var result1 = con.ExecuteSelect($"select word from Word where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
-                return (string)result1.FirstOrDefault()["word"];
-            });
-
             Task<List<Page>> pagesTask = Task.Run(() =>
             {
                 var con = new DBCon();
                 var ps = new List<Page>();
 
-                var result2 = con.ExecuteSelect(@"
+                var result = con.ExecuteSelect(@"
 select firstRef.sourceWordId, firstRef.word, firstRef.snippet, count(wwrr.targetWordId) as cnt
 from WordReference as wwrr
 right outer join (
 select wr.sourceWordId, w.word, wr.snippet 
-from WordReference as wr 
+from (
+select sourceWordId, snippet from WordReference where targetWordId = @wordId
+) as wr 
 inner join Word as w 
 on wr.sourceWordId = w.wordId 
-and targetWordId = @wordId
 ) as firstRef
 on firstRef.sourceWordId = wwrr.targetWordId
 group by firstRef.sourceWordId, firstRef.word, firstRef.snippet
 order by cnt desc;
 ", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
 
-                result2.ForEach((e) =>
+                result.ForEach((e) =>
                 {
                     var page = new Page();
                     page.wordId = (int)e["sourceWordId"];
@@ -124,7 +118,7 @@ order by cnt desc;
                 var con = new DBCon();
                 var cs = new List<object>();
 
-                var result3 = con.ExecuteSelect(@"
+                var result = con.ExecuteSelect(@"
 select category, count(*) as cnt 
 from (
 	select wordId, category, count(*) as cnt1 from 
@@ -139,7 +133,7 @@ from (
 group by category
 order by cnt desc;
 ", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
-                result3.ForEach((f) =>
+                result.ForEach((f) =>
                 {
                     cs.Add(new
                     {
@@ -149,6 +143,14 @@ order by cnt desc;
                 });
                 return cs;
             });
+
+            Task<string> wordTask = Task.Run(() =>
+            {
+                var con = new DBCon();
+                var result = con.ExecuteSelect($"select word from Word where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
+                return (string)result.FirstOrDefault()["word"];
+            });
+
 
             var word = await wordTask;
             var pages = await pagesTask;
