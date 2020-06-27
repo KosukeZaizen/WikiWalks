@@ -152,8 +152,8 @@ order by cnt desc;
 
 
             var word = await wordTask;
-            var pages = await pagesTask;
             var categories = await categoriesTask;
+            var pages = await pagesTask;
             return new { wordId, word, pages, categories };
         }
     }
