@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using RelatedPages.Models;
 using System.Linq;
 using WikiWalks;
+using System.Threading.Tasks;
 
 namespace RelatedPages.Controllers
 {
@@ -73,24 +74,29 @@ order by cnt desc
         }
 
         [HttpGet("[action]")]
-        public object getRelatedArticles(int wordId)
+        public async Task<object> getRelatedArticles(int wordId)
         {
             if (wordId <= 0) return new { };
 
-            var con = new DBCon();
-            var pages = new List<Page>();
-            var categories = new List<object>();
+            Task<string> wordTask = Task.Run(() =>
+            {
+                var con = new DBCon();
+                var result1 = con.ExecuteSelect($"select word from Word where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
+                return (string)result1.FirstOrDefault()["word"];
+            });
 
-            var result1 = con.ExecuteSelect($"select word from word where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
-            string word = (string)result1.FirstOrDefault()["word"];
+            Task<List<Page>> pagesTask = Task.Run(() =>
+            {
+                var con = new DBCon();
+                var ps = new List<Page>();
 
-            var result2 = con.ExecuteSelect(@"
-select firstRef.sourceWordId, firstRef.word, firstRef.snippet, count(wwrr.targetWordId) as cnt 
+                var result2 = con.ExecuteSelect(@"
+select firstRef.sourceWordId, firstRef.word, firstRef.snippet, count(wwrr.targetWordId) as cnt
 from WordReference as wwrr
 right outer join (
 select wr.sourceWordId, w.word, wr.snippet 
 from WordReference as wr 
-inner join word as w 
+inner join Word as w 
 on wr.sourceWordId = w.wordId 
 and targetWordId = @wordId
 ) as firstRef
@@ -99,19 +105,26 @@ group by firstRef.sourceWordId, firstRef.word, firstRef.snippet
 order by cnt desc;
 ", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
 
-            result2.ForEach((e) =>
-            {
-                var page = new Page();
-                page.wordId = (int)e["sourceWordId"];
+                result2.ForEach((e) =>
+                {
+                    var page = new Page();
+                    page.wordId = (int)e["sourceWordId"];
 
-                page.word = (string)e["word"];
-                page.snippet = (string)e["snippet"];
-                page.referenceCount = (int)e["cnt"];
+                    page.word = (string)e["word"];
+                    page.snippet = (string)e["snippet"];
+                    page.referenceCount = (int)e["cnt"];
 
-                pages.Add(page);
+                    ps.Add(page);
+                });
+                return ps;
             });
 
-            var result3 = con.ExecuteSelect(@"
+            Task<List<object>> categoriesTask = Task.Run(() =>
+            {
+                var con = new DBCon();
+                var cs = new List<object>();
+
+                var result3 = con.ExecuteSelect(@"
 select category, count(*) as cnt 
 from (
 	select wordId, category, count(*) as cnt1 from 
@@ -126,15 +139,20 @@ from (
 group by category
 order by cnt desc;
 ", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
-            result3.ForEach((f) =>
-            {
-                categories.Add(new
+                result3.ForEach((f) =>
                 {
-                    category = (string)f["category"],
-                    cnt = (int)f["cnt"]
+                    cs.Add(new
+                    {
+                        category = (string)f["category"],
+                        cnt = (int)f["cnt"]
+                    });
                 });
+                return cs;
             });
 
+            var word = await wordTask;
+            var pages = await pagesTask;
+            var categories = await categoriesTask;
             return new { wordId, word, pages, categories };
         }
     }
