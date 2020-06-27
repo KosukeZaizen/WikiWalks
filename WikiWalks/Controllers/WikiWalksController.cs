@@ -113,10 +113,10 @@ order by cnt desc;
                 return ps;
             });
 
-            Task<List<object>> categoriesTask = Task.Run(() =>
+            Task<List<Category>> categoriesTask = Task.Run(() =>
             {
                 var con = new DBCon();
-                var cs = new List<object>();
+                var cs = new List<Category>();
 
                 var result = con.ExecuteSelect(@"
 select category, count(*) as cnt 
@@ -135,11 +135,10 @@ order by cnt desc;
 ", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
                 result.ForEach((f) =>
                 {
-                    cs.Add(new
-                    {
-                        category = (string)f["category"],
-                        cnt = (int)f["cnt"]
-                    });
+                    var c = new Category();
+                    c.category = (string)f["category"];
+                    c.cnt = (int)f["cnt"];
+                    cs.Add(c);
                 });
                 return cs;
             });

@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
@@ -45,7 +44,7 @@ namespace WikiWalks
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, AllWorsGetter allWorsGetter, AllCategoriesGetter allCategoriesGetter)
         {
             if (env.IsDevelopment())
             {
@@ -84,7 +83,7 @@ namespace WikiWalks
                     lstSitemap.Add(dicAll);
 
                     //category page
-                    IEnumerable<string> allCategories = getAllCategories();
+                    IEnumerable<string> allCategories = allCategoriesGetter.getCategories().Select(c => c.category);
                     foreach (var category in allCategories)
                     {
                         var dic2 = new Dictionary<string, string>();
@@ -93,7 +92,7 @@ namespace WikiWalks
                     }
 
                     //word page
-                    IEnumerable<int> allWordId = getAllWordId();
+                    IEnumerable<int> allWordId = allWorsGetter.getPages().Select(p => p.wordId);
                     foreach (var wordId in allWordId)
                     {
                         var dicWordId = new Dictionary<string, string>();
@@ -101,7 +100,7 @@ namespace WikiWalks
                         lstSitemap.Add(dicWordId);
                     }
 
-                    string resultXML = await RegisterSitemap(lstSitemap);
+                    string resultXML = RegisterSitemap(lstSitemap);
 
                     await context.Response.WriteAsync(resultXML);
                 }
@@ -129,7 +128,7 @@ namespace WikiWalks
             });
         }
 
-        public async Task<string> RegisterSitemap(IEnumerable<Dictionary<string, string>> sitemapItems)
+        public string RegisterSitemap(IEnumerable<Dictionary<string, string>> sitemapItems)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -154,60 +153,6 @@ namespace WikiWalks
 
             return sb.ToString();
         }
-
-        public IEnumerable<string> getAllCategories()
-        {
-            var con = new DBCon();
-            var l = new List<string>();
-
-            var result = con.ExecuteSelect(@"
-select category, count(*) as cnt 
-from (
-	select wordId, category, count(*) as cnt1 from Category as c 
-	inner join WordReference as r 
-	on c.wordId = r.targetWordId 
-	group by wordId, category
-	having count(*) > 4
-) as rel
-group by category 
-order by cnt desc;
-");
-
-            result.ForEach((e) =>
-            {
-                var category = (string)e["category"];
-
-                l.Add(category);
-            });
-
-            return l;
-        }
-
-        public IEnumerable<int> getAllWordId()
-        {
-            var con = new DBCon();
-            var pages = new List<int>();
-
-            string sql = @"
-select w.wordId, w.word, count(*) as cnt from word as w
-inner join WordReference as wr
-on w.wordId = wr.targetWordId
-group by w.wordId, w.word
-having count(*) > 4
-order by cnt desc;
-";
-
-            var result = con.ExecuteSelect(sql);
-
-            result.ForEach((e) =>
-            {
-                var word = (int)e["wordId"];
-                pages.Add(word);
-            });
-
-            return pages;
-        }
-
     }
 
     public class AllWorsGetter
@@ -270,10 +215,10 @@ order by cnt desc;
 
     public class AllCategoriesGetter
     {
-        private IEnumerable<object> categories;
+        private IEnumerable<Category> categories;
         public AllCategoriesGetter()
         {
-            categories = new List<object>();
+            categories = new List<Category>();
 
             Task.Run(async () =>
             {
@@ -291,7 +236,7 @@ order by cnt desc;
             setAllCategories();
         }
 
-        public IEnumerable<object> getCategories()
+        public IEnumerable<Category> getCategories()
         {
             return categories;
         }
@@ -299,7 +244,7 @@ order by cnt desc;
         private void setAllCategories()
         {
             var con = new DBCon();
-            var l = new List<object>();
+            var l = new List<Category>();
 
             var result = con.ExecuteSelect(@"
 select category, count(*) as cnt from Category C
@@ -310,10 +255,11 @@ order by cnt desc;
 
             result.ForEach((e) =>
             {
-                var category = (string)e["category"];
-                var cnt = (int)e["cnt"];
+                var c = new Category();
+                c.category = (string)e["category"];
+                c.cnt = (int)e["cnt"];
 
-                l.Add(new { category, cnt });
+                l.Add(c);
             });
 
             categories = l;
