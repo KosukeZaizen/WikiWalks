@@ -94,16 +94,26 @@ group by targetWordId;
                 var con = new DBCon();
                 var ps = new List<Page>();
 
-                var result = con.ExecuteSelect("select sourceWordId, snippet from WordReference where targetWordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
+                var result = con.ExecuteSelect(@"
+select w.wordId, w.word, wr.snippet from Word as w
+inner join
+(select sourceWordId, snippet from WordReference where targetWordId = @wordId)
+as wr
+on w.wordId = wr.sourceWordId;
+", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
 
                 result.ForEach((e) =>
                 {
-                    var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["sourceWordId"]);
-                    if (page != null)
+                    var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
+                    if (page == null)
                     {
-                        page.snippet = (string)e["snippet"];
-                        ps.Add(page);
+                        page = new Page();
+                        page.wordId = (int)e["wordId"];
+                        page.word = (string)e["word"];
+                        page.referenceCount = 0;
                     }
+                    page.snippet = (string)e["snippet"];
+                    ps.Add(page);
                 });
 
                 return ps.OrderByDescending(p => p.referenceCount).ToList();
