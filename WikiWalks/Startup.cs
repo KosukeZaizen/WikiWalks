@@ -168,8 +168,13 @@ namespace WikiWalks
                 {
                     try
                     {
-                        await Task.Delay(1000 * 60 * 10);
-                        setAllPages();
+                        await Task.Delay(1000 * 60);
+
+                        int min = DateTime.Now.Minute % 10;
+                        if (min == 5)
+                        {
+                            setAllPages();
+                        }
                     }
                     catch (Exception ex) { }
                 }
@@ -226,8 +231,13 @@ order by cnt desc;
                 {
                     try
                     {
-                        await Task.Delay(1000 * 60 * 10);
-                        setAllCategories();
+                        await Task.Delay(1000 * 60);
+
+                        int min = DateTime.Now.Minute % 10;
+                        if (min == 7)
+                        {
+                            setAllCategories();
+                        }
                     }
                     catch (Exception ex) { }
                 }
