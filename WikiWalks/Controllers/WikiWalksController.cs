@@ -118,27 +118,14 @@ order by cnt desc;
                 var con = new DBCon();
                 var cs = new List<Category>();
 
-                var result = con.ExecuteSelect(@"
-select category, count(*) as cnt 
-from (
-	select wordId, category, count(*) as cnt1 from 
-	(
-	select wordId, category from Category A where exists (select * from Category B where A.category = B.category and wordId = @wordId)
-	) as c 
-	inner join WordReference as r 
-	on c.wordId = r.targetWordId 
-	group by wordId, category
-	having count(*) > 4
-) as rel
-group by category
-order by cnt desc;
-", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
+                var result = con.ExecuteSelect("select category from Category where wordId = @wordId", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
                 result.ForEach((f) =>
                 {
-                    var c = new Category();
-                    c.category = (string)f["category"];
-                    c.cnt = (int)f["cnt"];
-                    cs.Add(c);
+                    var c = allCategoriesGetter.getCategories().FirstOrDefault(ca => ca.category == (string)f["category"]);
+                    if (c != null)
+                    {
+                        cs.Add(c);
+                    }
                 });
                 return cs;
             });
@@ -146,7 +133,7 @@ order by cnt desc;
             Task<string> wordTask = Task.Run(() =>
             {
                 var con = new DBCon();
-                var result = con.ExecuteSelect($"select word from Word where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
+                var result = con.ExecuteSelect("select word from Word where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
                 return (string)result.FirstOrDefault()["word"];
             });
 
