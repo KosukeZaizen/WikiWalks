@@ -40,34 +40,45 @@ namespace RelatedPages.Controllers
             var pages = new List<Page>();
 
             string sql = @"
-select wordsForCategory.wordId, wordsForCategory.word, 
-max(case when wr.targetWordId = wr.sourceWordId then wr.snippet else ' ' + wr.snippet end) as snippet, 
-count(wr.targetWordId) as cnt 
-from
-(
-select c.wordId, w.word
-from category as c 
-inner join word as w 
-on c.wordId = w.wordId 
-and c.category like @category
-) as wordsForCategory
-left outer join WordReference as wr
-on wordsForCategory.wordId = wr.targetWordId
-group by wordsForCategory.wordId, wordsForCategory.word
-order by cnt desc
-;";
+select targetWordId as wordId,
+LTRIM(max(case when targetWordId = sourceWordId then snippet else ' ' + snippet end)) as snippet
+from WordReference r 
+where exists (select * from category c where category like @category and r.targetWordId = c.wordId)
+group by targetWordId;
+";
 
             var result = con.ExecuteSelect(sql, new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, category } } });
 
             result.ForEach((e) =>
             {
-                var page = new Page();
-                page.wordId = (int)e["wordId"];
-                page.word = (string)e["word"];
-                page.snippet = (string)e["snippet"];
-                page.referenceCount = (int)e["cnt"];
+                var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
+                if (page != null)
+                {
+                    page.snippet = (string)e["snippet"];
+                    pages.Add(page);
+                }
+            });
 
-                pages.Add(page);
+            return pages;
+        }
+
+        [HttpGet("[action]")]
+        public IEnumerable<Page> getWordsForCategoryWithoutSnippet(string category)
+        {
+            var con = new DBCon();
+            var pages = new List<Page>();
+
+            string sql = "select wordId from category where category like @category;";
+
+            var result = con.ExecuteSelect(sql, new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, category } } });
+
+            result.ForEach((e) =>
+            {
+                var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
+                if (page != null)
+                {
+                    pages.Add(page);
+                }
             });
 
             return pages;
