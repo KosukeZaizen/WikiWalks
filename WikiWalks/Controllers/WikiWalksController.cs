@@ -40,7 +40,7 @@ namespace RelatedPages.Controllers
             var pages = new List<Page>();
 
             string sql = @"
-select targetWordId as wordId,
+select targetWordId,
 LTRIM(max(case when targetWordId = sourceWordId then snippet else ' ' + snippet end)) as snippet
 from WordReference r 
 where exists (select * from category c where category like @category and r.targetWordId = c.wordId)
@@ -51,7 +51,7 @@ group by targetWordId;
 
             result.ForEach((e) =>
             {
-                var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
+                var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["targetWordId"]);
                 if (page != null)
                 {
                     page.snippet = (string)e["snippet"];
@@ -94,34 +94,19 @@ group by targetWordId;
                 var con = new DBCon();
                 var ps = new List<Page>();
 
-                var result = con.ExecuteSelect(@"
-select firstRef.sourceWordId, firstRef.word, firstRef.snippet, count(wwrr.targetWordId) as cnt
-from WordReference as wwrr
-right outer join (
-select wr.sourceWordId, w.word, wr.snippet 
-from (
-select sourceWordId, snippet from WordReference where targetWordId = @wordId
-) as wr 
-inner join Word as w 
-on wr.sourceWordId = w.wordId 
-) as firstRef
-on firstRef.sourceWordId = wwrr.targetWordId
-group by firstRef.sourceWordId, firstRef.word, firstRef.snippet
-order by cnt desc;
-", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
+                var result = con.ExecuteSelect("select sourceWordId, snippet from WordReference where targetWordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
 
                 result.ForEach((e) =>
                 {
-                    var page = new Page();
-                    page.wordId = (int)e["sourceWordId"];
-
-                    page.word = (string)e["word"];
-                    page.snippet = (string)e["snippet"];
-                    page.referenceCount = (int)e["cnt"];
-
-                    ps.Add(page);
+                    var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["sourceWordId"]);
+                    if (page != null)
+                    {
+                        page.snippet = (string)e["snippet"];
+                        ps.Add(page);
+                    }
                 });
-                return ps;
+
+                return ps.OrderByDescending(p => p.referenceCount).ToList();
             });
 
             Task<List<Category>> categoriesTask = Task.Run(() =>
