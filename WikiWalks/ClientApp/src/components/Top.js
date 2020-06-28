@@ -46,7 +46,10 @@ class Top extends Component {
                     <thead>
                         <tr>
                             <th>Category Name</th>
-                            <th>Number of Keywords</th>
+                            <th><span style={{
+                                display: "inline-block",
+                                minWidth: 100,
+                            }}>Number of Keywords</span></th>
                         </tr>
                     </thead>
                     <tbody>

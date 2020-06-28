@@ -81,7 +81,10 @@ class Category extends Component {
                     <thead>
                         <tr>
                             <th>Keywords</th>
-                            <th>Found Articles</th>
+                            <th><span style={{
+                                display: "inline-block",
+                                minWidth: 70,
+                            }}>Found Articles</span></th>
                         </tr>
                     </thead>
                     <tbody>
