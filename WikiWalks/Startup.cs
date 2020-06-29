@@ -259,8 +259,10 @@ order by cnt desc;
             var l = new List<Category>();
 
             var result = con.ExecuteSelect(@"
-select category, count(*) as cnt from Category C
-where exists (select targetWordId from WordReference W where W.targetWordId = C.wordId group by targetWordId having count(targetWordId) > 4)
+select category, count(*) as cnt 
+from Category C
+inner join (select targetWordId from WordReference group by targetWordId having count(targetWordId) > 4) as W
+on W.targetWordId = C.wordId 
 group by category
 order by cnt desc;
 ");
