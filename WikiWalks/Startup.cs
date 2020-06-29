@@ -196,7 +196,9 @@ namespace WikiWalks
             string sql = @"
 select w.wordId, w.word, wr.cnt from Word as w
 inner join (
-select targetWordId, count(targetWordId) cnt from WordReference group by targetWordId having count(targetWordId) > 4
+select targetWordId, count(targetWordId) cnt from WordReference
+WITH (INDEX(target_word_index))
+group by targetWordId having count(targetWordId) > 4
 ) as wr
 on w.wordId = wr.targetWordId
 order by cnt desc;
