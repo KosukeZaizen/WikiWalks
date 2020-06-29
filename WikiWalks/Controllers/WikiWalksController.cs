@@ -95,7 +95,7 @@ on w.wordId = wr.sourceWordId;
                 var con = new DBCon();
                 var cs = new List<Category>();
 
-                var result = con.ExecuteSelect("select category from Category where wordId = @wordId", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
+                var result = con.ExecuteSelect("select category from Category where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
                 result.ForEach((f) =>
                 {
                     var c = allCategoriesGetter.getCategories().FirstOrDefault(ca => ca.category == (string)f["category"]);
