@@ -39,36 +39,6 @@ namespace RelatedPages.Controllers
             var con = new DBCon();
             var pages = new List<Page>();
 
-            string sql = @"
-select targetWordId,
-LTRIM(max(case when r.targetWordId = r.sourceWordId then r.snippet else ' ' + r.snippet end)) as snippet
-from WordReference r 
-inner join (select * from Category c where category like @category) as c
-on r.targetWordId = c.wordId
-group by targetWordId;
-";
-
-            var result = con.ExecuteSelect(sql, new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, category } } });
-
-            result.ForEach((e) =>
-            {
-                var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["targetWordId"]);
-                if (page != null)
-                {
-                    page.snippet = (string)e["snippet"];
-                    pages.Add(page);
-                }
-            });
-
-            return pages;
-        }
-
-        [HttpGet("[action]")]
-        public IEnumerable<Page> getWordsForCategoryWithoutSnippet(string category)
-        {
-            var con = new DBCon();
-            var pages = new List<Page>();
-
             string sql = "select wordId from category where category like @category;";
 
             var result = con.ExecuteSelect(sql, new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, category } } });
