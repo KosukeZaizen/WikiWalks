@@ -41,9 +41,10 @@ namespace RelatedPages.Controllers
 
             string sql = @"
 select targetWordId,
-LTRIM(max(case when targetWordId = sourceWordId then snippet else ' ' + snippet end)) as snippet
+LTRIM(max(case when r.targetWordId = r.sourceWordId then r.snippet else ' ' + r.snippet end)) as snippet
 from WordReference r 
-where exists (select * from category c where category like @category and r.targetWordId = c.wordId)
+inner join (select * from Category c where category like @category) as c
+on r.targetWordId = c.wordId
 group by targetWordId;
 ";
 
