@@ -7,6 +7,13 @@ import Head from './Helmet';
 
 class Category extends Component {
 
+    sectionStyle = {
+        display: "block",
+        borderTop: "1px solid #dcdcdc",
+        paddingTop: 12,
+        marginTop: 12,
+    };
+
     constructor(props) {
         super(props);
 
@@ -53,33 +60,34 @@ class Category extends Component {
                         <meta itemProp="position" content="2" />
                     </span>
                 </div>
-                <hr />
-                <h1>Keywords</h1>
-                <br />
-                {lineChangeDesc}
-                <br />
-                <table className='table table-striped'>
-                    <thead>
-                        <tr>
-                            <th>Keywords</th>
-                            <th>Found Articles</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {pages.length > 0 ? pages.filter(page => page.referenceCount > 4).map(page =>
-                            <tr key={page.wordId}>
-                                <td>
-                                    <Link to={"/word/" + page.wordId}>{page.word}</Link>
-                                </td>
-                                <td>
-                                    {page.referenceCount} pages
-                                </td>
+                <section style={this.sectionStyle}>
+                    <h1>Keywords</h1>
+                    <br />
+                    {lineChangeDesc}
+                    <br />
+                    <table className='table table-striped'>
+                        <thead>
+                            <tr>
+                                <th>Keywords</th>
+                                <th>Found Articles</th>
                             </tr>
-                        )
-                            :
-                            <tr><td>Loading...</td><td></td></tr>}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {pages.length > 0 ? pages.filter(page => page.referenceCount > 4).map(page =>
+                                <tr key={page.wordId}>
+                                    <td>
+                                        <Link to={"/word/" + page.wordId}>{page.word}</Link>
+                                    </td>
+                                    <td>
+                                        {page.referenceCount} pages
+                                </td>
+                                </tr>
+                            )
+                                :
+                                <tr><td>Loading...</td><td></td></tr>}
+                        </tbody>
+                    </table>
+                </section>
             </div>
         );
     }

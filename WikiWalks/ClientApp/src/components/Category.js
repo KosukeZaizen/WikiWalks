@@ -7,6 +7,13 @@ import Head from './Helmet';
 
 class Category extends Component {
 
+    sectionStyle = {
+        display: "block",
+        borderTop: "1px solid #dcdcdc",
+        paddingTop: 12,
+        marginTop: 12,
+    };
+
     constructor(props) {
         super(props);
 
@@ -70,38 +77,40 @@ class Category extends Component {
                         <meta itemProp="position" content="2" />
                     </span>
                 </div>
-                <hr />
-                <h1>{category}</h1>
-                <br />
-                {lineChangeDesc}
-                <br />
-                <hr />
-                <h2>{`Keywords about ${category}`}</h2>
-                <table className='table table-striped'>
-                    <thead>
-                        <tr>
-                            <th>Keywords</th>
-                            <th><span style={{
-                                display: "inline-block",
-                                minWidth: 70,
-                            }}>Found Articles</span></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {pages.length > 0 ? pages.sort((p1, p2) => p2.referenceCount - p1.referenceCount).filter(page => page.referenceCount > 4).map(page =>
-                            <tr key={page.wordId}>
-                                <td>
-                                    <Link to={"/word/" + page.wordId}>{page.word}</Link>
+                <section style={this.sectionStyle}>
+                    <h1>{category}</h1>
+                    <br />
+                    {lineChangeDesc}
+                    <br />
+                    <section style={this.sectionStyle}>
+                        <h2>{`Keywords about ${category}`}</h2>
+                        <table className='table table-striped'>
+                            <thead>
+                                <tr>
+                                    <th>Keywords</th>
+                                    <th><span style={{
+                                        display: "inline-block",
+                                        minWidth: 70,
+                                    }}>Found Articles</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {pages.length > 0 ? pages.sort((p1, p2) => p2.referenceCount - p1.referenceCount).filter(page => page.referenceCount > 4).map(page =>
+                                    <tr key={page.wordId}>
+                                        <td>
+                                            <Link to={"/word/" + page.wordId}>{page.word}</Link>
+                                        </td>
+                                        <td>
+                                            {page.referenceCount} pages
                                 </td>
-                                <td>
-                                    {page.referenceCount} pages
-                                </td>
-                            </tr>
-                        )
-                            :
-                            <tr><td>Loading...</td><td></td></tr>}
-                    </tbody>
-                </table>
+                                    </tr>
+                                )
+                                    :
+                                    <tr><td>Loading...</td><td></td></tr>}
+                            </tbody>
+                        </table>
+                    </section>
+                </section>
             </div>
         );
     }
