@@ -18,7 +18,7 @@ class Category extends Component {
         super(props);
 
         const originalCategory = this.props.match.params.category;
-        const encodedCategory = originalCategory.split(",").join("%2C").split("'").join("%27");
+        const encodedCategory = originalCategory.split(",").join("%2C");
         if (originalCategory !== encodedCategory) {
             //If the comma was not encoded, use encoded URL to prevent the duplication of the pages
             window.location.href = `/category/${encodedCategory}`;
