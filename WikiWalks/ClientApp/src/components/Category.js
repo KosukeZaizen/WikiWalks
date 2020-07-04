@@ -24,6 +24,12 @@ class Category extends Component {
             window.location.href = `/category/${encodedCategory}`;
         }
 
+        if (window.location.pathname.includes("%27")) {
+            //基本的にはエンコードされたURLを正とするが、react-routerの仕様上、
+            //「%27」のみは「'」を正とする。
+            window.location.href = window.location.pathname.split("%27").join("'");
+        }
+
         const category = decodeURIComponent(originalCategory.split("_").join(" "));
 
         this.state = {

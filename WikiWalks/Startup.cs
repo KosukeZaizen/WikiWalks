@@ -87,7 +87,7 @@ namespace WikiWalks
                     foreach (var category in allCategories)
                     {
                         var dic2 = new Dictionary<string, string>();
-                        dic2["loc"] = domain + "/category/" + HttpUtility.UrlEncode(category.Replace(" ", "_"));
+                        dic2["loc"] = domain + "/category/" + HttpUtility.UrlEncode(category.Replace(" ", "_")).Replace("%27", "'");
                         lstSitemap.Add(dic2);
                     }
 
