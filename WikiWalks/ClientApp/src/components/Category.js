@@ -17,14 +17,14 @@ class Category extends Component {
     constructor(props) {
         super(props);
 
-        const originalCategory = this.props.match.params.category;
+        const originalCategory = this.props.match.params.category.split("#")[0];
         const encodedCategory = originalCategory.split(",").join("%2C");
         if (originalCategory !== encodedCategory) {
             //If the comma was not encoded, use encoded URL to prevent the duplication of the pages
             window.location.href = `/category/${encodedCategory}`;
         }
 
-        if (window.location.pathname.includes("%27")) {
+        if (window.location.pathname.split("#")[0].includes("%27")) {
             //基本的にはエンコードされたURLを正とするが、react-routerの仕様上、
             //「%27」のみは「'」を正とする。
             window.location.href = window.location.pathname.split("%27").join("'");
