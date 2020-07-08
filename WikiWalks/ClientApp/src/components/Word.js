@@ -18,6 +18,33 @@ class PagesForTheTitles extends Component {
         marginBottom: 30,
     };
 
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            screenWidth: window.innerWidth,
+        };
+
+        let timer;
+        window.onresize = () => {
+            if (timer > 0) {
+                clearTimeout(timer);
+            }
+
+            timer = setTimeout(() => {
+                this.changeScreenSize();
+            }, 100);
+        };
+    }
+
+    changeScreenSize = () => {
+        if (this.state.screenWidth !== window.innerWidth) {
+            this.setState({
+                screenWidth: window.innerWidth,
+            });
+        }
+    }
+
     componentDidMount() {
         // This method is called when the component is first added to the document
         this.fetchData();
@@ -36,6 +63,7 @@ class PagesForTheTitles extends Component {
 
     render() {
         const { wordId, categories, pages } = this.props.pages;
+        const isWide = this.state.screenWidth > 991;
 
         if (("" + wordId) !== this.props.match.params.wordId) return <p>Loading...</p>;
 
@@ -46,7 +74,6 @@ class PagesForTheTitles extends Component {
         const description = `This is a list of the Wikipedia pages about "${word}". Please check the list below to learn about "${word}"!`;
         const arrDesc = description.split(". ");
         const lineChangeDesc = arrDesc.map((d, i) => <span key={i}>{d}{i < arrDesc.length - 1 && ". "}<br /></span>);
-
 
         return (
             <div>
@@ -98,10 +125,10 @@ class PagesForTheTitles extends Component {
                     {lineChangeDesc}
                     <span id="indexOfVocabLists"></span>
                     <br />
-                    <div style={window.innerWidth > 991 ? { display: "flex" } : {}}>
+                    <div style={isWide ? { display: "flex" } : {}}>
                         {
                             categories && categories.length > 0 &&
-                            <div style={{ maxWidth: "500px", padding: "10px", marginBottom: "30px", border: "5px double gray", width: "100%" }}>
+                            <div style={{ maxWidth: "500px", padding: "10px", marginBottom: isWide ? "auto" : "30px", marginRight: isWide ? 20 : 0, border: "5px double gray", width: "100%" }}>
                                 <center><p style={{ fontWeight: "bold", fontSize: "large" }}>Index</p></center>
                                 {word ? <ul style={{ ...this.sectionStyle, marginBottom: 0, }}>
                                     <li><AnchorLink href={`#Pages about ${word}`}>{`Pages about ${word}`}</AnchorLink></li>
