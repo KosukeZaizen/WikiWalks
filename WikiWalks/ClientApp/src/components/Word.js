@@ -46,7 +46,6 @@ class PagesForTheTitles extends Component {
     }
 
     componentDidMount() {
-        // This method is called when the component is first added to the document
         this.fetchData();
     }
 
@@ -81,6 +80,12 @@ class PagesForTheTitles extends Component {
                     title={word}
                     desc={description}
                 />
+                {
+                    pages && pages.length > 50 &&
+                    <GoogleAd
+                        style={{ marginBottom: 20 }}
+                    />
+                }
                 <div className="breadcrumbs" itemScope itemType="https://schema.org/BreadcrumbList" style={{ textAlign: "left" }}>
                     <span itemProp="itemListElement" itemScope itemType="http://schema.org/ListItem">
                         <Link to="/" itemProp="item" style={{ marginRight: "5px", marginLeft: "5px" }}>
@@ -142,7 +147,10 @@ class PagesForTheTitles extends Component {
                             </div>
                         }
                         {
-                            pages && pages.length > 50 && <aside style={{ width: "100%" }}><GoogleAd /></aside>
+                            pages && pages.length > 50 &&
+                            <GoogleAd
+                                style={{ width: "100%", marginBottom: isWide ? 0 : 30 }}
+                            />
                         }
                     </div>
                     <section style={this.sectionStyle}>
@@ -150,7 +158,7 @@ class PagesForTheTitles extends Component {
                         {renderTable(this.props)}
                     </section>
                     {
-                        pages && pages.length > 50 && <aside><GoogleAd /></aside>
+                        pages && pages.length > 50 && <GoogleAd />
                     }
                     {categories && categories.length > 0 && categories.map((c, i) => (
                         <RenderOtherTable
