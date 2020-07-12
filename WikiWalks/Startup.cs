@@ -36,6 +36,9 @@ namespace WikiWalks
                 configuration.RootPath = "ClientApp/build";
             });
 
+            //一旦ロックを解除
+            DB_Util.releaseLock();
+
             var allWorsGetter = new AllWorsGetter();
             services.AddSingleton(allWorsGetter);
 

@@ -82,4 +82,12 @@ public class DB_Util
             con.ExecuteUpdate(sql);
         }
     }
+
+    public static void releaseLock()
+    {
+        //Lock解除
+        var con = new DBCon();
+        string sql = "update LockHeavySql set isLocked = 0;";
+        con.ExecuteUpdate(sql);
+    }
 }
