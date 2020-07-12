@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
 using RelatedPages.Models;
 
 public class DB_Util
@@ -39,5 +42,42 @@ public class DB_Util
         var records = con.ExecuteSelect(sql, null);
 
         return records;
+    }
+
+    public static async Task runHeavySqlAsync(Action proc)
+    {
+        var con = new DBCon();
+
+        try
+        {
+            var isLocked = true;
+
+            while (isLocked)
+            {
+                string sqlToChek = "select isLocked from LockHeavySql";
+
+                var checkResult = con.ExecuteSelect(sqlToChek).FirstOrDefault();
+
+                isLocked = (bool)checkResult["isLocked"];
+
+                if (isLocked)
+                {
+                    await Task.Delay(1000 * 30);
+                }
+            }
+
+            //Lockをかける
+            string sql = "update LockHeavySql set isLocked = 1;";
+            con.ExecuteUpdate(sql);
+
+            //処理実行
+            proc();
+        }
+        finally
+        {
+            //Lock解除
+            string sql = "update LockHeavySql set isLocked = 0;";
+            con.ExecuteUpdate(sql);
+        }
     }
 }

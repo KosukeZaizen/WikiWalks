@@ -157,7 +157,7 @@ namespace WikiWalks
 
     public class AllWorsGetter
     {
-        private IEnumerable<Page> pages;
+        private IEnumerable<Page> pages = new List<Page>();
         public AllWorsGetter()
         {
             pages = new List<Page>();
@@ -173,14 +173,14 @@ namespace WikiWalks
                         int min = DateTime.Now.Minute % 20;
                         if (min == 10)
                         {
-                            setAllPages();
+                            await setAllPagesAsync();
                         }
                     }
                     catch (Exception ex) { }
                 }
             });
 
-            setAllPages();
+            setAllPagesAsync();
         }
 
         public IEnumerable<Page> getPages()
@@ -188,12 +188,14 @@ namespace WikiWalks
             return pages;
         }
 
-        private void setAllPages()
+        private async Task setAllPagesAsync()
         {
-            var con = new DBCon();
-            var allPages = new List<Page>();
+            Action proc = () =>
+            {
+                var con = new DBCon();
+                var allPages = new List<Page>();
 
-            string sql = @"
+                string sql = @"
 select
 wr1.wordId,
 wr1.word,
@@ -214,26 +216,29 @@ from (
 order by wr1.cnt desc;
 ";
 
-            var result = con.ExecuteSelect(sql);
+                var result = con.ExecuteSelect(sql);
 
-            result.ForEach((e) =>
-            {
-                var page = new Page();
-                page.wordId = (int)e["wordId"];
-                page.word = (string)e["word"];
-                page.referenceCount = (int)e["cnt"];
-                page.snippet = (string)e["snippet"];
+                result.ForEach((e) =>
+                {
+                    var page = new Page();
+                    page.wordId = (int)e["wordId"];
+                    page.word = (string)e["word"];
+                    page.referenceCount = (int)e["cnt"];
+                    page.snippet = (string)e["snippet"];
 
-                allPages.Add(page);
-            });
+                    allPages.Add(page);
+                });
 
-            pages = allPages;
+                pages = allPages;
+            };
+
+            await DB_Util.runHeavySqlAsync(proc);
         }
     }
 
     public class AllCategoriesGetter
     {
-        private IEnumerable<Category> categories;
+        private IEnumerable<Category> categories = new List<Category>();
         public AllCategoriesGetter()
         {
             categories = new List<Category>();
@@ -249,14 +254,14 @@ order by wr1.cnt desc;
                         int min = DateTime.Now.Minute % 20;
                         if (min == 15)
                         {
-                            setAllCategories();
+                            await setAllCategoriesAsync();
                         }
                     }
                     catch (Exception ex) { }
                 }
             });
 
-            setAllCategories();
+            setAllCategoriesAsync();
         }
 
         public IEnumerable<Category> getCategories()
@@ -264,12 +269,14 @@ order by wr1.cnt desc;
             return categories;
         }
 
-        private void setAllCategories()
+        private async Task setAllCategoriesAsync()
         {
-            var con = new DBCon();
-            var l = new List<Category>();
+            Action proc = () =>
+            {
+                var con = new DBCon();
+                var l = new List<Category>();
 
-            var result = con.ExecuteSelect(@"
+                var result = con.ExecuteSelect(@"
 select category, count(*) as cnt 
 from Category C
 inner join (select targetWordId from WordReference group by targetWordId having count(targetWordId) > 4) as W
@@ -278,16 +285,19 @@ group by category
 order by cnt desc;
 ");
 
-            result.ForEach((e) =>
-            {
-                var c = new Category();
-                c.category = (string)e["category"];
-                c.cnt = (int)e["cnt"];
+                result.ForEach((e) =>
+                {
+                    var c = new Category();
+                    c.category = (string)e["category"];
+                    c.cnt = (int)e["cnt"];
 
-                l.Add(c);
-            });
+                    l.Add(c);
+                });
 
-            categories = l;
+                categories = l;
+            };
+
+            await DB_Util.runHeavySqlAsync(proc);
         }
     }
 }

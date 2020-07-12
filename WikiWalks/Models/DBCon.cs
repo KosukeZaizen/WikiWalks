@@ -63,7 +63,7 @@ namespace RelatedPages.Models
             }
         }
 
-        public bool ExecuteUpdate(string sql, Dictionary<string, object[]> dicParams)
+        public bool ExecuteUpdate(string sql, Dictionary<string, object[]> dicParams = null)
         {
             using (var connection = new SqlConnection(PrivateConsts.CONNECTION_STRING))
             using (var command = new SqlCommand("SET ANSI_WARNINGS OFF; " + sql, connection))
