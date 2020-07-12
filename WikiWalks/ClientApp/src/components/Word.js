@@ -55,7 +55,11 @@ class PagesForTheTitles extends Component {
     }
 
     componentDidUpdate(previousProps) {
-        if (previousProps.location.split("#")[0] !== this.props.location.split("#")[0]) {
+
+        const preLoc = previousProps.location.pathname.split("#")[0];
+        const curLoc = this.props.location.pathname.split("#")[0];
+
+        if (preLoc !== curLoc) {
             this.fetchData();
         }
     }

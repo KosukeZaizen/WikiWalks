@@ -67,6 +67,7 @@ class Top extends Component {
                             <tr><td>Loading...</td><td></td></tr>}
                     </tbody>
                 </table>
+                {categories.length > 0 && categories.length < 200 && <center>Loading...</center>}
                 <hr />
                 <Link to="/all">
                     <center>
