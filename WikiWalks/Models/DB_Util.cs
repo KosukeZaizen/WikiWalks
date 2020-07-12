@@ -51,11 +51,8 @@ public class DB_Util
         try
         {
             var isLocked = true;
-            int count = 0;
             while (isLocked)
             {
-                count++;
-
                 string sqlToChek = "select isLocked from LockHeavySql";
 
                 var checkResult = con.ExecuteSelect(sqlToChek).FirstOrDefault();
@@ -72,17 +69,14 @@ public class DB_Util
             string sql = "update LockHeavySql set isLocked = 1;";
             con.ExecuteUpdate(sql);
 
-            if (count > 1)
-            {
-                //待った直後はDBの負荷が下がっていない可能性があるので、処理実行前にさらに30秒待つ
-                await Task.Delay(1000 * 30);
-            }
-
             //処理実行
             proc();
         }
         finally
         {
+            //実行直後はDBの負荷が下がっていない可能性があるので、Lock解除まで30秒待つ
+            await Task.Delay(1000 * 30);
+
             //Lock解除
             string sql = "update LockHeavySql set isLocked = 0;";
             con.ExecuteUpdate(sql);
