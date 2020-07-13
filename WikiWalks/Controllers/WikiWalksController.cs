@@ -60,7 +60,7 @@ namespace RelatedPages.Controllers
         {
             if (wordId <= 0) return new { };
 
-            Task<List<Page>> pagesTask = Task.Run(() =>
+            Task<List<Page>> pagesTask = Task.Run(async () =>
             {
                 var con = new DBCon();
                 var ps = new List<Page>();
@@ -68,12 +68,12 @@ namespace RelatedPages.Controllers
                 var result = con.ExecuteSelect(@"
 select w.wordId, w.word, wr.snippet from Word as w
 inner join
-(select sourceWordId, snippet from WordReference where targetWordId = @wordId)
+(select top(500) sourceWordId, snippet from WordReference where targetWordId = @wordId)
 as wr
 on w.wordId = wr.sourceWordId;
 ", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
 
-                result.ForEach((e) =>
+                await Task.WhenAll(result.Select((e) => Task.Run(() =>
                 {
                     var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
                     if (page == null)
@@ -85,32 +85,31 @@ on w.wordId = wr.sourceWordId;
                     }
                     page.snippet = (string)e["snippet"];
                     ps.Add(page);
-                });
-
+                })));
                 return ps.OrderByDescending(p => p.referenceCount).ToList();
             });
 
-            Task<List<Category>> categoriesTask = Task.Run(() =>
+            Task<List<Category>> categoriesTask = Task.Run(async () =>
             {
                 var con = new DBCon();
                 var cs = new List<Category>();
 
                 var result = con.ExecuteSelect("select category from Category where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
-                result.ForEach((f) =>
+                await Task.WhenAll(result.Select((f) => Task.Run(() =>
                 {
                     var c = allCategoriesGetter.getCategories().FirstOrDefault(ca => ca.category == (string)f["category"]);
                     if (c != null)
                     {
                         cs.Add(c);
                     }
-                });
+                })));
                 return cs;
             });
 
             Task<string> wordTask = Task.Run(() =>
             {
                 var con = new DBCon();
-                var result = con.ExecuteSelect("select word from Word where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
+                var result = con.ExecuteSelect("select top(1) word from Word where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
                 return (string)result.FirstOrDefault()["word"];
             });
 
