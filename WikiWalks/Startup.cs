@@ -37,7 +37,7 @@ namespace WikiWalks
             });
 
             //一旦ロックを解除
-            DB_Util.releaseLock();
+            //DB_Util.releaseLock();
 
             var allWorsGetter = new AllWorsGetter();
             services.AddSingleton(allWorsGetter);
@@ -235,7 +235,8 @@ order by wr1.cnt desc;
                 pages = allPages;
             };
 
-            await DB_Util.runHeavySqlAsync(proc);
+            //await DB_Util.runHeavySqlAsync(proc);
+            proc();
         }
     }
 
@@ -300,7 +301,8 @@ order by cnt desc;
                 categories = l;
             };
 
-            await DB_Util.runHeavySqlAsync(proc);
+            //await DB_Util.runHeavySqlAsync(proc);
+            proc();
         }
     }
 }
