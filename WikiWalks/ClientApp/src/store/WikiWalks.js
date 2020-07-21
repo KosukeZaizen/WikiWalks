@@ -1,3 +1,4 @@
+const initializeType = 'INITIALIZE';
 const receivePagesType = 'RECEIVE_PAGES';
 const initialState = { pages: {} };
 
@@ -14,11 +15,18 @@ export const actionCreators = {
         } catch (e) {
             window.location.href = `/not-found?p=${window.location.pathname}`;
         }
+    },
+    initialize: () => (dispatch, getState) => {
+        dispatch({ type: initializeType });
     }
 };
 
 export const reducer = (state, action) => {
     state = state || initialState;
+
+    if (action.type === initializeType) {
+        return initialState;
+    }
 
     if (action.type === receivePagesType) {
         return {

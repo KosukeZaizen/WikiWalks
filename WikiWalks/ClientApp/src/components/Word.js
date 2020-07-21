@@ -50,6 +50,7 @@ class PagesForTheTitles extends Component {
     }
 
     fetchData() {
+        this.props.initialize();
         const wordId = this.props.match.params.wordId.split("#")[0];
         this.props.requestPagesForTheTitle(wordId);
     }
@@ -68,9 +69,7 @@ class PagesForTheTitles extends Component {
         const { wordId, categories, pages } = this.props.pages;
         const isWide = this.state.screenWidth > 991;
 
-        if (("" + wordId) !== this.props.match.params.wordId) return <p>Loading...</p>;
-
-        const word = this.props.pages.word || "";
+        const word = this.props.pages.word || "Loading...";
         const cat = categories && categories.sort((c1, c2) => c2.cnt - c1.cnt)[0];
         const category = cat && cat.category;
         const categoryForUrl = category && encodeURIComponent(category.split(" ").join("_"));
