@@ -283,20 +283,19 @@ function renderTable(pages, wordId, word) {
                 pageLoaded &&
                 <React.Fragment>
                     {
-                        pages.length > 50 && <GoogleAd />
+                        pages.length > 50 && <GoogleAd style={{ padding: "10px 0" }} />
                     }
                     <table className='table table-striped' style={{ wordBreak: "break-all", marginBottom: 0, }}>
                         <tbody>
                             <tr style={{ display: "none" }}></tr>
-                            {data.splice(0, 8)}
+                            {data.splice(0, 9)}
                         </tbody>
                     </table >
                     {
-                        pages.length > 50 && <GoogleAd />
+                        pages.length > 50 && <GoogleAd style={{ padding: "10px 0" }} />
                     }
                     <table className='table table-striped' style={{ wordBreak: "break-all" }}>
                         <tbody>
-                            <tr style={{ display: "none" }}></tr>
                             {data}
                         </tbody>
                     </table >
