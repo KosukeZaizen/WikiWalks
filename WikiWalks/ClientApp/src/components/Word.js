@@ -86,12 +86,6 @@ class PagesForTheTitles extends Component {
                     title={word}
                     desc={description}
                 />
-                {
-                    pages && pages.length > 50 &&
-                    <GoogleAd
-                        style={{ marginBottom: 20 }}
-                    />
-                }
                 <div className="breadcrumbs" itemScope itemType="https://schema.org/BreadcrumbList" style={{ textAlign: "left" }}>
                     <span itemProp="itemListElement" itemScope itemType="http://schema.org/ListItem">
                         <Link to="/" itemProp="item" style={{ marginRight: "5px", marginLeft: "5px" }}>
@@ -163,9 +157,6 @@ class PagesForTheTitles extends Component {
                         <h2 id={`Pages about ${word}`}>{`Pages about ${word}`}</h2>
                         {renderTable(pages, wordId, word)}
                     </section>
-                    {
-                        pages && pages.length > 50 && <GoogleAd />
-                    }
                     {categories && categories.length > 0 && categories.map((c, i) => (
                         <RenderOtherTable
                             key={i}
@@ -192,92 +183,122 @@ class PagesForTheTitles extends Component {
 }
 
 function renderTable(pages, wordId, word) {
-    return (
-        <table className='table table-striped' style={{ wordBreak: "break-all" }}>
-            <thead>
-                <tr>
-                    <th style={{ minWidth: 120 }}>Page Title</th>
-                    <th>Snippet</th>
-                </tr>
-            </thead>
-            <tbody>
-                {pages && pages.length > 0 ?
-                    pages
-                        .sort((page1, page2) => page2.snippet.split(word).length - page1.snippet.split(word).length)
-                        .sort((page1, page2) => {
-                            if (page2.wordId === wordId) {
-                                return 1;
-                            } else if (page1.wordId === wordId) {
-                                return -1;
+
+    const pageLoaded = pages && pages.length > 0;
+
+    const data = pageLoaded && pages
+        .sort((page1, page2) => page2.snippet.split(word).length - page1.snippet.split(word).length)
+        .sort((page1, page2) => {
+            if (page2.wordId === wordId) {
+                return 1;
+            } else if (page1.wordId === wordId) {
+                return -1;
+            } else {
+                return 0;
+            }
+        })
+        .map((page, i) => {
+            const inlineWords = page.word.split(" ").map((w, j) => {
+                return <React.Fragment key={j}>{j !== 0 && " "}<span style={{ display: "inline-block" }}>{w}</span></React.Fragment>;
+            });
+            return (
+                <tr key={i}>
+                    <td style={{ fontWeight: "bold", minWidth: 120 }}>
+                        {page.wordId !== wordId && page.referenceCount > 4 ? <Link to={"/word/" + page.wordId}>{inlineWords}</Link> : inlineWords}
+                    </td>
+                    <td>
+                        {page.snippet.split(" ").map((s, j) => {
+                            const patterns = {
+                                '&lt;': '<',
+                                '&gt;': '>',
+                                '&amp;': '&',
+                                '&quot;': '"',
+                                '&#x27;': '\'',
+                                '&#x60;': '`'
+                            };
+                            Object.keys(patterns).forEach(k => { s = s.split(k).join(patterns[k]) });
+                            const symbol = j === 0 ? "" : " ";
+                            const words = word.split(" ");
+                            if (words.some(w => w.toLowerCase() === s.toLowerCase())) {
+                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s}</span></React.Fragment>;
+                            } else if (words.some(w => (w.toLowerCase() + ",") === s.toLowerCase())) {
+                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.slice(0, -1)}</span>,</React.Fragment>;
+                            } else if (words.some(w => (w.toLowerCase() + ",\"") === s.toLowerCase())) {
+                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.slice(0, -1)}</span>{",\""}</React.Fragment>;
+                            } else if (words.some(w => (w.toLowerCase() + ".") === s.toLowerCase())) {
+                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.slice(0, -1)}</span>.</React.Fragment>;
+                            } else if (words.some(w => (w.toLowerCase() + ")") === s.toLowerCase())) {
+                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.slice(0, -1)}</span>{")"}</React.Fragment>;
+                            } else if (words.some(w => (w.toLowerCase() + "\"") === s.toLowerCase())) {
+                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.slice(0, -1)}</span>{"\""}</React.Fragment>;
+                            } else if (words.some(w => ("(" + w.toLowerCase()) === s.toLowerCase())) {
+                                return <React.Fragment key={j}>{symbol}{"("}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.substr(1)}</span></React.Fragment>;
+                            } else if (words.some(w => ("\"" + w.toLowerCase()) === s.toLowerCase())) {
+                                return <React.Fragment key={j}>{symbol}{"\""}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.substr(1)}</span></React.Fragment>;
+                            } else if (words.some(w => ("\"\"" + w.toLowerCase()) === s.toLowerCase())) {
+                                return <React.Fragment key={j}>{symbol}{"\"\""}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.substr(1)}</span></React.Fragment>;
                             } else {
-                                return 0;
+                                return <React.Fragment key={j}>{symbol}<span style={{ display: "inline-block" }}>{s}</span></React.Fragment>;
                             }
-                        })
-                        .map((page, i) => {
-                            const inlineWords = page.word.split(" ").map((w, j) => {
+                        })}
+                        <br />
+                        <Button
+                            size="sm"
+                            color="dark"
+                            href={"https://en.wikipedia.org/wiki/" + page.word.split(" ").join("_")}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ marginTop: 7 }}
+                        >
+                            {`Check the Wikipedia page for ${page.word}`.split(" ").map((w, j) => {
                                 return <React.Fragment key={j}>{j !== 0 && " "}<span style={{ display: "inline-block" }}>{w}</span></React.Fragment>;
-                            });
-                            return (
-                                <tr key={i}>
-                                    <td style={{ fontWeight: "bold" }}>
-                                        {page.wordId !== wordId && page.referenceCount > 4 ? <Link to={"/word/" + page.wordId}>{inlineWords}</Link> : inlineWords}
-                                    </td>
-                                    <td>
-                                        {page.snippet.split(" ").map((s, j) => {
-                                            const patterns = {
-                                                '&lt;': '<',
-                                                '&gt;': '>',
-                                                '&amp;': '&',
-                                                '&quot;': '"',
-                                                '&#x27;': '\'',
-                                                '&#x60;': '`'
-                                            };
-                                            Object.keys(patterns).forEach(k => { s = s.split(k).join(patterns[k]) });
-                                            const symbol = j === 0 ? "" : " ";
-                                            const words = word.split(" ");
-                                            if (words.some(w => w.toLowerCase() === s.toLowerCase())) {
-                                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s}</span></React.Fragment>;
-                                            } else if (words.some(w => (w.toLowerCase() + ",") === s.toLowerCase())) {
-                                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.slice(0, -1)}</span>,</React.Fragment>;
-                                            } else if (words.some(w => (w.toLowerCase() + ",\"") === s.toLowerCase())) {
-                                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.slice(0, -1)}</span>{",\""}</React.Fragment>;
-                                            } else if (words.some(w => (w.toLowerCase() + ".") === s.toLowerCase())) {
-                                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.slice(0, -1)}</span>.</React.Fragment>;
-                                            } else if (words.some(w => (w.toLowerCase() + ")") === s.toLowerCase())) {
-                                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.slice(0, -1)}</span>{")"}</React.Fragment>;
-                                            } else if (words.some(w => (w.toLowerCase() + "\"") === s.toLowerCase())) {
-                                                return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.slice(0, -1)}</span>{"\""}</React.Fragment>;
-                                            } else if (words.some(w => ("(" + w.toLowerCase()) === s.toLowerCase())) {
-                                                return <React.Fragment key={j}>{symbol}{"("}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.substr(1)}</span></React.Fragment>;
-                                            } else if (words.some(w => ("\"" + w.toLowerCase()) === s.toLowerCase())) {
-                                                return <React.Fragment key={j}>{symbol}{"\""}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.substr(1)}</span></React.Fragment>;
-                                            } else if (words.some(w => ("\"\"" + w.toLowerCase()) === s.toLowerCase())) {
-                                                return <React.Fragment key={j}>{symbol}{"\"\""}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s.substr(1)}</span></React.Fragment>;
-                                            } else {
-                                                return <React.Fragment key={j}>{symbol}<span style={{ display: "inline-block" }}>{s}</span></React.Fragment>;
-                                            }
-                                        })}
-                                        <br />
-                                        <Button
-                                            size="sm"
-                                            color="dark"
-                                            href={"https://en.wikipedia.org/wiki/" + page.word.split(" ").join("_")}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            style={{ marginTop: 7 }}
-                                        >
-                                            {`Check the Wikipedia page for ${page.word}`.split(" ").map((w, j) => {
-                                                return <React.Fragment key={j}>{j !== 0 && " "}<span style={{ display: "inline-block" }}>{w}</span></React.Fragment>;
-                                            })}
-                                        </Button>
-                                    </td>
-                                </tr>
-                            );
-                        })
-                    :
-                    <tr><td>Loading...</td><td></td></tr>}
-            </tbody>
-        </table>
+                            })}
+                        </Button>
+                    </td>
+                </tr>
+            );
+        });
+
+    return (
+        <React.Fragment>
+            {
+                <table className='table table-striped' style={{ wordBreak: "break-all" }}>
+                    <thead>
+                        <tr>
+                            <th>Page Title</th>
+                            <th>Snippet</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {pageLoaded ?
+                            data.shift()
+                            :
+                            <tr><td>Loading...</td><td></td></tr>}
+                    </tbody>
+                </table>
+            }
+            {
+                pageLoaded &&
+                <React.Fragment>
+                    {
+                        pages.length > 50 && <GoogleAd />
+                    }
+                    <table className='table table-striped' style={{ wordBreak: "break-all" }}>
+                        <tbody>
+                            {data.splice(0, 8)}
+                        </tbody>
+                    </table >
+                    {
+                        pages.length > 50 && <GoogleAd />
+                    }
+                    <table className='table table-striped' style={{ wordBreak: "break-all" }}>
+                        <tbody>
+                            {data}
+                        </tbody>
+                    </table >
+                </React.Fragment>
+            }
+        </React.Fragment>
     );
 }
 
