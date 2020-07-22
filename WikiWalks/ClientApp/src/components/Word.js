@@ -232,7 +232,7 @@ function renderTable(props) {
                                             };
                                             Object.keys(patterns).forEach(k => { s = s.split(k).join(patterns[k]) });
                                             const symbol = j === 0 ? "" : " ";
-                                            const words = props.pages.word.split(" ");
+                                            const words = props.word.split(" ");
                                             if (words.some(w => w.toLowerCase() === s.toLowerCase())) {
                                                 return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s}</span></React.Fragment>;
                                             } else if (words.some(w => (w.toLowerCase() + ",") === s.toLowerCase())) {
