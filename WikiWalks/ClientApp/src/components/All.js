@@ -68,7 +68,7 @@ class Category extends Component {
                     <table className='table table-striped'>
                         <thead>
                             <tr>
-                                <th>Keywords</th>
+                                <th style={{ verticalAlign: "middle" }}>Keywords</th>
                                 <th>Found Articles</th>
                             </tr>
                         </thead>

@@ -57,7 +57,7 @@ class Top extends Component {
                 <table className='table table-striped'>
                     <thead>
                         <tr>
-                            <th>Category Name</th>
+                            <th style={{ verticalAlign: "middle" }}>Category Name</th>
                             <th><span style={{
                                 display: "inline-block",
                                 minWidth: 100,

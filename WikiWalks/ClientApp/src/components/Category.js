@@ -93,7 +93,7 @@ class Category extends Component {
                         <table className='table table-striped'>
                             <thead>
                                 <tr>
-                                    <th>Keywords</th>
+                                    <th style={{ verticalAlign: "middle" }}>Keywords</th>
                                     <th><span style={{
                                         display: "inline-block",
                                         minWidth: 70,
