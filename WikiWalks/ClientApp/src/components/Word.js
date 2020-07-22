@@ -53,6 +53,7 @@ class PagesForTheTitles extends Component {
         this.props.initialize();
         const wordId = this.props.match.params.wordId.split("#")[0];
         this.props.requestWord(wordId);
+        this.props.requestCategoriesForTheTitle(wordId);
         this.props.requestPagesForTheTitle(wordId);
     }
 
@@ -69,7 +70,8 @@ class PagesForTheTitles extends Component {
     render() {
         const isWide = this.state.screenWidth > 991;
 
-        const { wordId, categories, pages } = this.props.pages;
+        const wordId = Number(this.props.match.params.wordId.split("#")[0]);
+        const { pages, categories } = this.props;
         const word = this.props.word || "Loading...";
         const cat = categories && categories.sort((c1, c2) => c2.cnt - c1.cnt)[0];
         const category = cat && cat.category;
@@ -159,7 +161,7 @@ class PagesForTheTitles extends Component {
                     </div>
                     <section style={this.sectionStyle}>
                         <h2 id={`Pages about ${word}`}>{`Pages about ${word}`}</h2>
-                        {renderTable(this.props)}
+                        {renderTable(pages, wordId, word)}
                     </section>
                     {
                         pages && pages.length > 50 && <GoogleAd />
@@ -170,6 +172,7 @@ class PagesForTheTitles extends Component {
                             c={c}
                             wordId={wordId}
                             sectionStyle={this.sectionStyle}
+                            pagesLoaded={pages && pages.length > 0}
                         />
                     ))}
                     {
@@ -188,8 +191,7 @@ class PagesForTheTitles extends Component {
     }
 }
 
-function renderTable(props) {
-    const { pages, wordId, word } = props.pages;
+function renderTable(pages, wordId, word) {
     return (
         <table className='table table-striped' style={{ wordBreak: "break-all" }}>
             <thead>
@@ -232,7 +234,7 @@ function renderTable(props) {
                                             };
                                             Object.keys(patterns).forEach(k => { s = s.split(k).join(patterns[k]) });
                                             const symbol = j === 0 ? "" : " ";
-                                            const words = props.word.split(" ");
+                                            const words = word.split(" ");
                                             if (words.some(w => w.toLowerCase() === s.toLowerCase())) {
                                                 return <React.Fragment key={j}>{symbol}<span style={{ fontWeight: "bold", display: "inline-block" }}>{s}</span></React.Fragment>;
                                             } else if (words.some(w => (w.toLowerCase() + ",") === s.toLowerCase())) {
@@ -290,11 +292,11 @@ class RenderOtherTable extends Component {
     }
 
     componentDidMount() {
-        this.fetchData();
+        this.props.pagesLoaded && this.fetchData();
     }
 
     componentDidUpdate(previousProps) {
-        if (previousProps.c !== this.props.c) {
+        if (!previousProps.pagesLoaded && this.props.pagesLoaded) {
             this.fetchData();
         }
     }

@@ -70,12 +70,10 @@ namespace RelatedPages.Controllers
         {
             if (wordId <= 0) return new { };
 
-            Task<List<Page>> pagesTask = Task.Run(async () =>
-            {
-                var con = new DBCon();
-                var ps = new List<Page>();
+            var con = new DBCon();
+            var ps = new List<Page>();
 
-                var result = con.ExecuteSelect(@"
+            var result = con.ExecuteSelect(@"
 select w.wordId, w.word, wr.snippet from Word as w
 inner join
 (select top(500) sourceWordId, snippet from WordReference where targetWordId = @wordId)
@@ -83,43 +81,44 @@ as wr
 on w.wordId = wr.sourceWordId;
 ", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
 
-                await Task.WhenAll(result.Select((e) => Task.Run(() =>
-                {
-                    var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
-                    if (page == null)
-                    {
-                        page = new Page();
-                        page.wordId = (int)e["wordId"];
-                        page.word = (string)e["word"];
-                        page.referenceCount = 0;
-                    }
-                    page.snippet = (string)e["snippet"];
-                    ps.Add(page);
-                })));
-                return ps.OrderByDescending(p => p.referenceCount).ToList();
-            });
-
-            Task<List<Category>> categoriesTask = Task.Run(async () =>
+            await Task.WhenAll(result.Select((e) => Task.Run(() =>
             {
-                var con = new DBCon();
-                var cs = new List<Category>();
-
-                var result = con.ExecuteSelect("select category from Category where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
-                await Task.WhenAll(result.Select((f) => Task.Run(() =>
+                var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
+                if (page == null)
                 {
-                    var c = allCategoriesGetter.getCategories().FirstOrDefault(ca => ca.category == (string)f["category"]);
-                    if (c != null)
-                    {
-                        cs.Add(c);
-                    }
-                })));
-                return cs;
-            });
+                    page = new Page();
+                    page.wordId = (int)e["wordId"];
+                    page.word = (string)e["word"];
+                    page.referenceCount = 0;
+                }
+                page.snippet = (string)e["snippet"];
+                ps.Add(page);
+            })));
 
+            var pages = ps.OrderByDescending(p => p.referenceCount).ToList();
 
-            var categories = await categoriesTask;
-            var pages = await pagesTask;
-            return new { wordId, pages, categories };
+            return new { pages };
+        }
+
+        [HttpGet("[action]")]
+        public async Task<object> getRelatedCategories(int wordId)
+        {
+            if (wordId <= 0) return new { };
+
+            var con = new DBCon();
+            var categories = new List<Category>();
+
+            var result = con.ExecuteSelect("select category from Category where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
+            await Task.WhenAll(result.Select((f) => Task.Run(() =>
+            {
+                var c = allCategoriesGetter.getCategories().FirstOrDefault(ca => ca.category == (string)f["category"]);
+                if (c != null)
+                {
+                    categories.Add(c);
+                }
+            })));
+
+            return new { categories };
         }
     }
 }

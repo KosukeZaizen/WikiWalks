@@ -8,6 +8,8 @@ import Head from './Helmet';
 
 class Top extends Component {
 
+    unmounted = false;
+
     constructor(props) {
         super(props);
 
@@ -23,11 +25,17 @@ class Top extends Component {
             const categories = await response.json();
 
             for (let k in categories) {
-                this.setState({ categories: categories.slice(0, Number(k) + 1) });
-                await new Promise(resolve => setTimeout(() => resolve(), 100));
+                if (!this.unmounted) {
+                    this.setState({ categories: categories.slice(0, Number(k) + 1) });
+                    await new Promise(resolve => setTimeout(() => resolve(), 100));
+                }
             }
         }
         getData();
+    }
+
+    componentWillUnmount() {
+        this.unmounted = true;
     }
 
     render() {
