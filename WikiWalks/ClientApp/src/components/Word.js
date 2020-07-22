@@ -262,7 +262,7 @@ function renderTable(pages, wordId, word) {
     return (
         <React.Fragment>
             {
-                <table className='table table-striped' style={{ wordBreak: "break-all" }}>
+                <table className='table table-striped' style={{ wordBreak: "break-all", marginBottom: 0, }}>
                     <thead>
                         <tr>
                             <th>Page Title</th>
@@ -270,10 +270,12 @@ function renderTable(pages, wordId, word) {
                         </tr>
                     </thead>
                     <tbody>
-                        {pageLoaded ?
-                            data.shift()
-                            :
-                            <tr><td>Loading...</td><td></td></tr>}
+                        {
+                            pageLoaded ?
+                                data.shift()
+                                :
+                                <tr><td>Loading...</td><td></td></tr>
+                        }
                     </tbody>
                 </table>
             }
@@ -283,8 +285,9 @@ function renderTable(pages, wordId, word) {
                     {
                         pages.length > 50 && <GoogleAd />
                     }
-                    <table className='table table-striped' style={{ wordBreak: "break-all" }}>
+                    <table className='table table-striped' style={{ wordBreak: "break-all", marginBottom: 0, }}>
                         <tbody>
+                            <tr style={{ display: "none" }}></tr>
                             {data.splice(0, 8)}
                         </tbody>
                     </table >
@@ -293,6 +296,7 @@ function renderTable(pages, wordId, word) {
                     }
                     <table className='table table-striped' style={{ wordBreak: "break-all" }}>
                         <tbody>
+                            <tr style={{ display: "none" }}></tr>
                             {data}
                         </tbody>
                     </table >
