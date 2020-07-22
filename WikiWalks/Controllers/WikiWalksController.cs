@@ -56,6 +56,16 @@ namespace RelatedPages.Controllers
         }
 
         [HttpGet("[action]")]
+        public object getWord(int wordId)
+        {
+            if (wordId <= 0) return "";
+
+            var con = new DBCon();
+            var result = con.ExecuteSelect("select top(1) word from Word where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
+            return new { word = (string)result.FirstOrDefault()["word"] };
+        }
+
+        [HttpGet("[action]")]
         public async Task<object> getRelatedArticles(int wordId)
         {
             if (wordId <= 0) return new { };
@@ -106,18 +116,10 @@ on w.wordId = wr.sourceWordId;
                 return cs;
             });
 
-            Task<string> wordTask = Task.Run(() =>
-            {
-                var con = new DBCon();
-                var result = con.ExecuteSelect("select top(1) word from Word where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
-                return (string)result.FirstOrDefault()["word"];
-            });
 
-
-            var word = await wordTask;
             var categories = await categoriesTask;
             var pages = await pagesTask;
-            return new { wordId, word, pages, categories };
+            return new { wordId, pages, categories };
         }
     }
 }
