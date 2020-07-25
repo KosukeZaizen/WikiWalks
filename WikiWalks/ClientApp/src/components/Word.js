@@ -285,7 +285,7 @@ function renderTable(pages, wordId, word) {
                     <tbody>
                         {
                             pageLoaded ?
-                                data.shift()
+                                data.splice(0, 2)
                                 :
                                 <tr><td>Loading...</td><td></td></tr>
                         }
@@ -298,20 +298,58 @@ function renderTable(pages, wordId, word) {
                     {
                         pages.length > 50 && <GoogleAd style={{ padding: "10px 0" }} />
                     }
-                    <table className='table table-striped' style={{ wordBreak: "break-all", marginBottom: 0, }}>
-                        <tbody>
-                            <tr style={{ display: "none" }}></tr>
-                            {data.splice(0, 9)}
-                        </tbody>
-                    </table >
+                    {
+                        data.length > 0 &&
+                        <table className='table table-striped' style={{ wordBreak: "break-all", marginBottom: 0, }}>
+                            <tbody>
+                                {data.splice(0, 8)}
+                            </tbody>
+                        </table >
+                    }
                     {
                         pages.length > 50 && <GoogleAd style={{ padding: "10px 0" }} />
                     }
-                    <table className='table table-striped' style={{ wordBreak: "break-all" }}>
-                        <tbody>
-                            {data}
-                        </tbody>
-                    </table >
+                    {
+                        data.length > 0 &&
+                        <table className='table table-striped' style={{ wordBreak: "break-all", marginBottom: 0, }}>
+                            <tbody>
+                                {data.splice(0, 12)}
+                            </tbody>
+                        </table >
+                    }
+                    {
+                        pages.length > 50 && <GoogleAd style={{ padding: "10px 0" }} />
+                    }
+                    {
+                        data.length > 0 &&
+                        <table className='table table-striped' style={{ wordBreak: "break-all", marginBottom: 0, }}>
+                            <tbody>
+                                {data.splice(0, 12)}
+                            </tbody>
+                        </table >
+                    }
+                    {
+                        pages.length > 50 && <GoogleAd style={{ padding: "10px 0" }} />
+                    }
+                    {
+                        data.length > 0 &&
+                        <table className='table table-striped' style={{ wordBreak: "break-all", marginBottom: 0, }}>
+                            <tbody>
+                                {data.splice(0, 12)}
+                            </tbody>
+                        </table >
+                    }
+                    {
+                        pages.length > 50 && <GoogleAd style={{ padding: "10px 0" }} />
+                    }
+                    {
+                        data.length > 0 &&
+                        <table className='table table-striped' style={{ wordBreak: "break-all" }}>
+                            <tbody>
+                                {data}
+                            </tbody>
+                        </table >
+                    }
                 </React.Fragment>
             }
         </React.Fragment>
