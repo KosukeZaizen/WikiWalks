@@ -79,6 +79,7 @@ class PagesForTheTitles extends Component {
         const description = `This is a list of the Wikipedia pages about "${word}". Please check the list below to learn about "${word}"!`;
         const arrDesc = description.split(". ");
         const lineChangeDesc = arrDesc.map((d, i) => <span key={i}>{d}{i < arrDesc.length - 1 && ". "}<br /></span>);
+        const showAd = pages && pages.length > 50;
 
         return (
             <div>
@@ -86,6 +87,12 @@ class PagesForTheTitles extends Component {
                     title={word}
                     desc={description}
                 />
+                {
+                    showAd &&
+                    <GoogleAd
+                        style={{ marginBottom: 20 }}
+                    />
+                }
                 <div className="breadcrumbs" itemScope itemType="https://schema.org/BreadcrumbList" style={{ textAlign: "left" }}>
                     <span itemProp="itemListElement" itemScope itemType="http://schema.org/ListItem">
                         <Link to="/" itemProp="item" style={{ marginRight: "5px", marginLeft: "5px" }}>
@@ -147,7 +154,7 @@ class PagesForTheTitles extends Component {
                             </div>
                         }
                         {
-                            pages && pages.length > 50 &&
+                            showAd &&
                             <GoogleAd
                                 style={{ width: "100%", marginBottom: isWide ? 0 : 30 }}
                             />
@@ -157,6 +164,9 @@ class PagesForTheTitles extends Component {
                         <h2 id={`Pages about ${word}`}>{`Pages about ${word}`}</h2>
                         {renderTable(pages, wordId, word)}
                     </section>
+                    {
+                        showAd && <GoogleAd />
+                    }
                     {categories && categories.length > 0 && categories.map((c, i) => (
                         <RenderOtherTable
                             key={i}
@@ -173,6 +183,9 @@ class PagesForTheTitles extends Component {
                                 refForReturnToIndex={this.refForReturnToIndex}
                                 criteriaId={`Pages about ${word}`}
                             />
+                            {
+                                showAd && categories.length > 3 && <GoogleAd />
+                            }
                             <div style={{ height: "50px" }}></div>
                         </React.Fragment>
                     }
