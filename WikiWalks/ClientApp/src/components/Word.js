@@ -87,12 +87,6 @@ class PagesForTheTitles extends Component {
                     title={word}
                     desc={description}
                 />
-                {
-                    showAd &&
-                    <GoogleAd
-                        style={{ marginBottom: 20 }}
-                    />
-                }
                 <div className="breadcrumbs" itemScope itemType="https://schema.org/BreadcrumbList" style={{ textAlign: "left" }}>
                     <span itemProp="itemListElement" itemScope itemType="http://schema.org/ListItem">
                         <Link to="/" itemProp="item" style={{ marginRight: "5px", marginLeft: "5px" }}>
@@ -285,7 +279,7 @@ function renderTable(pages, wordId, word) {
                     <tbody>
                         {
                             pageLoaded ?
-                                data.splice(0, 2)
+                                data.shift()
                                 :
                                 <tr><td>Loading...</td><td></td></tr>
                         }
@@ -302,7 +296,8 @@ function renderTable(pages, wordId, word) {
                         data.length > 0 &&
                         <table className='table table-striped' style={{ wordBreak: "break-all", marginBottom: 0, }}>
                             <tbody>
-                                {data.splice(0, 8)}
+                                <tr style={{ display: "none" }}></tr>
+                                {data.splice(0, 9)}
                             </tbody>
                         </table >
                     }
