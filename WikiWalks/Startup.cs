@@ -43,7 +43,7 @@ namespace WikiWalks
             var allWorsGetter = new AllWorsGetter();
             services.AddSingleton(allWorsGetter);
 
-            var allCategoriesGetter = new AllCategoriesGetter();
+            var allCategoriesGetter = new AllCategoriesGetter(allWorsGetter);
             services.AddSingleton(allCategoriesGetter);
         }
 
@@ -174,8 +174,7 @@ namespace WikiWalks
                     {
                         await Task.Delay(1000 * 60);
 
-                        int min = DateTime.Now.Minute % 30;
-                        if (min == 15)
+                        if (DateTime.Now.Minute == 30)
                         {
                             await setAllPagesAsync();
                         }
@@ -296,9 +295,13 @@ from (
     public class AllCategoriesGetter
     {
         private IEnumerable<Category> categories = new List<Category>();
-        public AllCategoriesGetter()
+        private AllWorsGetter allWorsGetter;
+
+        public AllCategoriesGetter(AllWorsGetter allWorsGetter)
         {
-            setAllCategories();
+            this.allWorsGetter = allWorsGetter;
+
+            hurryToSetAllCategories();
 
             Task.Run(async () =>
             {
@@ -308,10 +311,9 @@ from (
                     {
                         await Task.Delay(1000 * 60);
 
-                        int min = DateTime.Now.Minute % 30;
-                        if (min == 25)
+                        if (DateTime.Now.Minute == 40)
                         {
-                            setAllCategories();
+                            await setAllCategoriesAsync();
                         }
                     }
                     catch (Exception ex) { }
@@ -324,8 +326,10 @@ from (
             return categories;
         }
 
-        private void setAllCategories()
+        private void hurryToSetAllCategories()
         {
+            DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, true); //開始記録
+
             var con = new DBCon();
             var l = new List<Category>();
 
@@ -347,6 +351,42 @@ group by category
             });
 
             categories = l.OrderByDescending(c => c.cnt).ToList();
+
+            DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, false); //終了記録
+        }
+
+
+        private async Task setAllCategoriesAsync()
+        {
+            DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, true); //開始記録
+
+            var con = new DBCon();
+            var l = new List<Category>();
+
+            var pages = allWorsGetter.getPages().ToList();
+
+            var result = con.ExecuteSelect("select distinct category from Category;");
+
+            await Task.Delay(1000 * 45);
+            foreach (var e in result)
+            {
+                await Task.Delay(5);
+
+                var c = new Category();
+                c.category = (string)e["category"];
+
+                c.cnt = con.ExecuteSelect(
+                    "select wordId from Category where category like @category;",
+                    new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, c.category } } }
+                    )
+                .Count((a) => pages.Any(p => p.wordId == (int)a["wordId"]));
+
+                l.Add(c);
+            }
+
+            categories = l.OrderByDescending(c => c.cnt).ToList();
+
+            DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, false); //終了記録
         }
     }
 }
