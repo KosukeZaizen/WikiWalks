@@ -273,9 +273,11 @@ from (
                 if (count > 4)
                 {
                     await Task.Delay(1);
-                    var page = new Page();
-                    page.wordId = wordId;
-                    page.referenceCount = count;
+                    Page page = new Page
+                    {
+                        wordId = wordId,
+                        referenceCount = count
+                    };
 
                     var resultForEachWord = con.ExecuteSelect(
                             sqlForEachWord,
