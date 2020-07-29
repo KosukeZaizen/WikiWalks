@@ -242,13 +242,7 @@ from (
             var con = new DBCon();
             var allPages = new List<Page>();
 
-            string sql = @"
-select targetWordId, count(targetWordId) cnt
-from WordReference
-group by targetWordId having count(targetWordId) > 4
-;";
-
-            var result = con.ExecuteSelect(sql);
+            var result = con.ExecuteSelect("select distinct targetWordId from WordReference;");
 
             string sqlForEachWord = @"
 select
@@ -264,26 +258,38 @@ from (
 ) as wr1
 ;";
 
+            string sqlForCnt = "select count(*) as cnt from WordReference where targetWordId = @wordId";
+
             await Task.Delay(1000 * 45);
             foreach (var e in result)
             {
-                await Task.Delay(5);
-                var page = new Page();
-                page.wordId = (int)e["targetWordId"];
-                page.referenceCount = (int)e["cnt"];
+                await Task.Delay(2);
+                var wordId = (int)e["targetWordId"];
+                var count = (int)con.ExecuteSelect(
+                        sqlForCnt,
+                        new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } }
+                        ).FirstOrDefault()["cnt"];
 
-                var resultForEachWord = con.ExecuteSelect(
-                    sqlForEachWord,
-                    new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, page.wordId } } }
-                    );
-                var wordInfo = resultForEachWord.FirstOrDefault();
-                if (wordInfo != null)
+                if (count > 4)
                 {
-                    page.word = (string)wordInfo["word"];
-                    page.snippet = (string)wordInfo["snippet"];
-                }
+                    await Task.Delay(3);
+                    var page = new Page();
+                    page.wordId = wordId;
+                    page.referenceCount = count;
 
-                allPages.Add(page);
+                    var resultForEachWord = con.ExecuteSelect(
+                            sqlForEachWord,
+                            new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } }
+                            );
+                    var wordInfo = resultForEachWord.FirstOrDefault();
+                    if (wordInfo != null)
+                    {
+                        page.word = (string)wordInfo["word"];
+                        page.snippet = (string)wordInfo["snippet"];
+                    }
+
+                    allPages.Add(page);
+                }
             }
 
             pages = allPages.OrderByDescending(p => p.referenceCount).ToList();
