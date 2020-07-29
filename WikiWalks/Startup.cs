@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Text;
 using System.Web;
 using System;
+using System.Data;
 
 namespace WikiWalks
 {
@@ -163,7 +164,7 @@ namespace WikiWalks
         private IEnumerable<Page> pages = new List<Page>();
         public AllWorsGetter()
         {
-            pages = new List<Page>();
+            hurryToSetAllPages();
 
             Task.Run(async () =>
             {
@@ -182,8 +183,6 @@ namespace WikiWalks
                     catch (Exception ex) { }
                 }
             });
-
-            setAllPagesAsync();
         }
 
         public IEnumerable<Page> getPages()
@@ -191,14 +190,14 @@ namespace WikiWalks
             return pages;
         }
 
-        private async Task setAllPagesAsync()
+        private void hurryToSetAllPages()
         {
-            Action proc = () =>
-            {
-                var con = new DBCon();
-                var allPages = new List<Page>();
+            DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, true); //開始記録
 
-                string sql = @"
+            var con = new DBCon();
+            var allPages = new List<Page>();
+
+            string sql = @"
 select
 wr1.wordId,
 wr1.word,
@@ -216,27 +215,81 @@ from (
 		) as wr
 		on w.wordId = wr.targetWordId
 	) as wr1
-order by wr1.cnt desc;
-";
+;";
 
-                var result = con.ExecuteSelect(sql);
+            var result = con.ExecuteSelect(sql);
 
-                result.ForEach((e) =>
+            result.ForEach((e) =>
+            {
+                var page = new Page();
+                page.wordId = (int)e["wordId"];
+                page.word = (string)e["word"];
+                page.referenceCount = (int)e["cnt"];
+                page.snippet = (string)e["snippet"];
+
+                allPages.Add(page);
+            });
+
+            pages = allPages.OrderByDescending(p => p.referenceCount).ToList();
+
+            DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, false); //終了記録
+        }
+
+
+        private async Task setAllPagesAsync()
+        {
+            DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, true); //開始記録
+
+            var con = new DBCon();
+            var allPages = new List<Page>();
+
+            string sql = @"
+select targetWordId, count(targetWordId) cnt
+from WordReference
+group by targetWordId having count(targetWordId) > 4
+;";
+
+            var result = con.ExecuteSelect(sql);
+
+            string sqlForEachWord = @"
+select
+wr1.word,
+isnull(
+	(select top(1) snippet from WordReference wr3 where wr3.sourceWordId = wr3.targetWordId and wr3.sourceWordId = wr1.wordId),
+	(select top(1) snippet from WordReference wr2 where wr2.sourceWordId = wr1.wordId)
+) as snippet
+from (
+	select wordId, word
+	from Word
+	where wordId = @wordId
+) as wr1
+;";
+
+            await Task.Delay(1000 * 45);
+            foreach (var e in result)
+            {
+                await Task.Delay(5);
+                var page = new Page();
+                page.wordId = (int)e["targetWordId"];
+                page.referenceCount = (int)e["cnt"];
+
+                var resultForEachWord = con.ExecuteSelect(
+                    sqlForEachWord,
+                    new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, page.wordId } } }
+                    );
+                var wordInfo = resultForEachWord.FirstOrDefault();
+                if (wordInfo != null)
                 {
-                    var page = new Page();
-                    page.wordId = (int)e["wordId"];
-                    page.word = (string)e["word"];
-                    page.referenceCount = (int)e["cnt"];
-                    page.snippet = (string)e["snippet"];
+                    page.word = (string)wordInfo["word"];
+                    page.snippet = (string)wordInfo["snippet"];
+                }
 
-                    allPages.Add(page);
-                });
+                allPages.Add(page);
+            }
 
-                pages = allPages;
-            };
+            pages = allPages.OrderByDescending(p => p.referenceCount).ToList();
 
-            //await DB_Util.runHeavySqlAsync(proc);
-            proc();
+            DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, false); //終了記録
         }
     }
 
@@ -245,7 +298,7 @@ order by wr1.cnt desc;
         private IEnumerable<Category> categories = new List<Category>();
         public AllCategoriesGetter()
         {
-            categories = new List<Category>();
+            setAllCategories();
 
             Task.Run(async () =>
             {
@@ -258,14 +311,12 @@ order by wr1.cnt desc;
                         int min = DateTime.Now.Minute % 20;
                         if (min == 15)
                         {
-                            await setAllCategoriesAsync();
+                            setAllCategories();
                         }
                     }
                     catch (Exception ex) { }
                 }
             });
-
-            setAllCategoriesAsync();
         }
 
         public IEnumerable<Category> getCategories()
@@ -273,36 +324,29 @@ order by wr1.cnt desc;
             return categories;
         }
 
-        private async Task setAllCategoriesAsync()
+        private void setAllCategories()
         {
-            Action proc = () =>
-            {
-                var con = new DBCon();
-                var l = new List<Category>();
+            var con = new DBCon();
+            var l = new List<Category>();
 
-                var result = con.ExecuteSelect(@"
+            var result = con.ExecuteSelect(@"
 select category, count(*) as cnt 
 from Category C
 inner join (select targetWordId from WordReference group by targetWordId having count(targetWordId) > 4) as W
 on W.targetWordId = C.wordId 
 group by category
-order by cnt desc;
-");
+;");
 
-                result.ForEach((e) =>
-                {
-                    var c = new Category();
-                    c.category = (string)e["category"];
-                    c.cnt = (int)e["cnt"];
+            result.ForEach((e) =>
+            {
+                var c = new Category();
+                c.category = (string)e["category"];
+                c.cnt = (int)e["cnt"];
 
-                    l.Add(c);
-                });
+                l.Add(c);
+            });
 
-                categories = l;
-            };
-
-            //await DB_Util.runHeavySqlAsync(proc);
-            proc();
+            categories = l.OrderByDescending(c => c.cnt).ToList();
         }
     }
 }

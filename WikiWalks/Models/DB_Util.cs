@@ -90,4 +90,28 @@ public class DB_Util
         string sql = "update LockHeavySql set isLocked = 0;";
         con.ExecuteUpdate(sql);
     }
+
+    public enum procTypes
+    {
+        enPage,
+        enCategory,
+        jpPage,
+        jpCategory,
+    }
+    public static void RegisterLastTopUpdate(procTypes procType, bool isStart)
+    {
+        //処理実行時間計測用
+        Task.Run(() =>
+        {
+            var con = new DBCon();
+            string targetColumn = isStart ? "startTime" : "endTime";
+
+            string sql = $"update LastTopUpdate set {targetColumn} = DATEADD(HOUR, 9, GETDATE()) where procType like @procType;";
+
+            con.ExecuteUpdate(
+                sql,
+                new Dictionary<string, object[]> { { "@procType", new object[2] { SqlDbType.NVarChar, procType.ToString() } } }
+            );
+        });
+    }
 }
