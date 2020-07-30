@@ -39,7 +39,7 @@ namespace RelatedPages.Controllers
             var con = new DBCon();
             var pages = new List<Page>();
 
-            string sql = "select wordId from category where category like @category;";
+            string sql = "select wordId from Category where category like @category;";
 
             var result = con.ExecuteSelect(sql, new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, category } } });
 
