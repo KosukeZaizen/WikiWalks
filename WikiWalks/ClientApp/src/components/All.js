@@ -27,19 +27,22 @@ class Category extends Component {
     componentDidMount() {
         const getData = async () => {
 
-            let moreData = true;
+            let previousCount = 0;
             let i = 100;
-            while (moreData) {
+            while (true) {
                 const url = `api/WikiWalks/getPartialWords?num=${i}`;
                 const response = await fetch(url);
                 const pages = await response.json();
 
-                if (this.unmounted) { break; }
+                if (this.unmounted || previousCount === pages.length) {
+                    break;
+                }
 
                 this.setState({ pages });
-
                 await new Promise(resolve => setTimeout(() => resolve(), 100));
+
                 i = i + 10;
+                previousCount = pages.length;
             }
         }
         getData();
