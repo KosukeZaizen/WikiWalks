@@ -112,6 +112,15 @@ public class DB_Util
                 sql,
                 new Dictionary<string, object[]> { { "@procType", new object[2] { SqlDbType.NVarChar, procType.ToString() } } }
             );
+
+            if (!isStart)
+            {
+                sql = "update LastTopUpdate set term = CONCAT(startTime, N' - ', endTime) from LastTopUpdate where procType like @procType;";
+                con.ExecuteUpdate(
+                    sql,
+                    new Dictionary<string, object[]> { { "@procType", new object[2] { SqlDbType.NVarChar, procType.ToString() } } }
+                );
+            }
         });
     }
 }
