@@ -22,15 +22,15 @@ namespace RelatedPages.Controllers
         }
 
         [HttpGet("[action]")]
-        public IEnumerable<Page> getAllWords()
+        public IEnumerable<Page> getPartialWords(int num)
         {
-            return allWorsGetter.getPages();
+            return allWorsGetter.getPages().Take(num);
         }
 
         [HttpGet("[action]")]
-        public IEnumerable<object> getAllCategories()
+        public IEnumerable<object> getPartialCategories(int num)
         {
-            return allCategoriesGetter.getCategories();
+            return allCategoriesGetter.getCategories().Take(num);
         }
 
         [HttpGet("[action]")]

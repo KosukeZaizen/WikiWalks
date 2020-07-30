@@ -20,15 +20,20 @@ class Top extends Component {
 
     componentDidMount() {
         const getData = async () => {
-            const url = `api/WikiWalks/getAllCategories`;
-            const response = await fetch(url);
-            const categories = await response.json();
 
-            for (let k in categories) {
-                if (!this.unmounted) {
-                    this.setState({ categories: categories.slice(0, Number(k) + 1) });
-                    await new Promise(resolve => setTimeout(() => resolve(), 100));
-                }
+            let moreData = true;
+            let i = 100;
+            while (moreData) {
+                const url = `api/WikiWalks/getPartialCategories?num=${i}`;
+                const response = await fetch(url);
+                const categories = await response.json();
+
+                if (this.unmounted) { break; }
+
+                this.setState({ categories });
+
+                await new Promise(resolve => setTimeout(() => resolve(), 100));
+                i = i + 10;
             }
         }
         getData();

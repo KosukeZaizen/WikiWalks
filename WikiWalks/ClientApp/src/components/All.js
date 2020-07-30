@@ -7,6 +7,8 @@ import Head from './Helmet';
 
 class Category extends Component {
 
+    unmounted = false;
+
     sectionStyle = {
         display: "block",
         borderTop: "1px solid #dcdcdc",
@@ -24,12 +26,27 @@ class Category extends Component {
 
     componentDidMount() {
         const getData = async () => {
-            const url = `api/WikiWalks/getAllWords`;
-            const response = await fetch(url);
-            const pages = await response.json();
-            this.setState({ pages });
+
+            let moreData = true;
+            let i = 100;
+            while (moreData) {
+                const url = `api/WikiWalks/getPartialWords?num=${i}`;
+                const response = await fetch(url);
+                const pages = await response.json();
+
+                if (this.unmounted) { break; }
+
+                this.setState({ pages });
+
+                await new Promise(resolve => setTimeout(() => resolve(), 100));
+                i = i + 10;
+            }
         }
         getData();
+    }
+
+    componentWillUnmount() {
+        this.unmounted = true;
     }
 
     render() {
