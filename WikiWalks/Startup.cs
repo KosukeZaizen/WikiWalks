@@ -242,8 +242,11 @@ from (
             var con = new DBCon();
             var allPages = new List<Page>();
 
-            var result = con.ExecuteSelect("select wordId from Word;");
+            var min = (int)con.ExecuteSelect("select min(wordId) as min from Word;").FirstOrDefault()["min"];
+            await Task.Delay(1000 * 10);
+            var max = (int)con.ExecuteSelect("select max(wordId) as max from Word;").FirstOrDefault()["max"];
 
+            string sqlForCnt = "select count(*) as cnt from WordReference where targetWordId = @wordId";
             string sqlForEachWord = @"
 select
 wr1.word,
@@ -258,13 +261,11 @@ from (
 ) as wr1
 ;";
 
-            string sqlForCnt = "select count(*) as cnt from WordReference where targetWordId = @wordId";
-
-            await Task.Delay(1000 * 45);
-            foreach (var e in result)
+            await Task.Delay(1000 * 10);
+            for (var i = min; i <= max; i++)
             {
                 await Task.Delay(1);
-                var wordId = (int)e["targetWordId"];
+                var wordId = i;
                 var count = (int)con.ExecuteSelect(
                         sqlForCnt,
                         new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } }
