@@ -264,7 +264,7 @@ from (
             await Task.Delay(1000 * 10);
             for (var wordId = min; wordId <= max; wordId++)
             {
-                await Task.Delay(2);
+                await Task.Delay(3);
 
                 int count = (int)con.ExecuteSelect(
                         sqlForCnt,
@@ -273,7 +273,7 @@ from (
 
                 if (count > 4)
                 {
-                    await Task.Delay(3);
+                    await Task.Delay(5);
                     Page page = new Page
                     {
                         wordId = wordId,
@@ -377,7 +377,7 @@ group by category
             var hashCategories = new HashSet<string>();
             foreach (var page in pages)
             {
-                await Task.Delay(6);
+                await Task.Delay(10);
                 con.ExecuteSelect(
                         "select category from Category where wordId = @wordId;",
                         new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, page.wordId } } }
@@ -390,7 +390,7 @@ group by category
             await Task.Delay(1000 * 45);
             foreach (var cat in hashCategories)
             {
-                await Task.Delay(7);
+                await Task.Delay(10);
 
                 var c = new Category();
                 c.category = cat;
