@@ -166,24 +166,28 @@ namespace WikiWalks
         private IEnumerable<Page> pages = new List<Page>();
         public AllWorsGetter()
         {
-            hurryToSetAllPages();
-
-            Task.Run(async () =>
+            try
             {
-                while (true)
-                {
-                    try
-                    {
-                        await Task.Delay(1000 * 60);
+                hurryToSetAllPages();
 
-                        if (DateTime.Now.Minute == 30)
+                Task.Run(async () =>
+                {
+                    while (true)
+                    {
+                        try
                         {
-                            await setAllPagesAsync();
+                            await Task.Delay(1000 * 60);
+
+                            if (DateTime.Now.Minute == 30)
+                            {
+                                await setAllPagesAsync();
+                            }
                         }
+                        catch (Exception ex) { }
                     }
-                    catch (Exception ex) { }
-                }
-            });
+                });
+            }
+            catch (Exception ex) { }
         }
 
         public IEnumerable<Page> getPages()
@@ -310,26 +314,30 @@ from (
 
         public AllCategoriesGetter(AllWorsGetter allWorsGetter)
         {
-            this.allWorsGetter = allWorsGetter;
-
-            hurryToSetAllCategories();
-
-            Task.Run(async () =>
+            try
             {
-                while (true)
-                {
-                    try
-                    {
-                        await Task.Delay(1000 * 60);
+                this.allWorsGetter = allWorsGetter;
 
-                        if (DateTime.Now.Minute == 40)
+                hurryToSetAllCategories();
+
+                Task.Run(async () =>
+                {
+                    while (true)
+                    {
+                        try
                         {
-                            await setAllCategoriesAsync();
+                            await Task.Delay(1000 * 60);
+
+                            if (DateTime.Now.Minute == 40)
+                            {
+                                await setAllCategoriesAsync();
+                            }
                         }
+                        catch (Exception ex) { }
                     }
-                    catch (Exception ex) { }
-                }
-            });
+                });
+            }
+            catch (Exception ex) { }
         }
 
         public IEnumerable<Category> getCategories()
