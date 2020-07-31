@@ -262,11 +262,11 @@ from (
 ;";
 
             await Task.Delay(1000 * 10);
-            for (var i = min; i <= max; i++)
+            for (var wordId = min; wordId <= max; wordId++)
             {
-                await Task.Delay(1);
-                var wordId = i;
-                var count = (int)con.ExecuteSelect(
+                await Task.Delay(2);
+
+                int count = (int)con.ExecuteSelect(
                         sqlForCnt,
                         new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } }
                         ).FirstOrDefault()["cnt"];
