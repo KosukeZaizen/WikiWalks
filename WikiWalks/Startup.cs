@@ -43,6 +43,8 @@ namespace WikiWalks
             var allWorsGetter = new AllWorsGetter();
             services.AddSingleton(allWorsGetter);
 
+            System.Threading.Thread.Sleep(1000 * 10);//DBへの負荷を考慮してSleep
+
             var allCategoriesGetter = new AllCategoriesGetter(allWorsGetter);
             services.AddSingleton(allCategoriesGetter);
         }
