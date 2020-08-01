@@ -279,7 +279,7 @@ from (
 
                 if (count > 4)
                 {
-                    await Task.Delay(5);
+                    await Task.Delay(50);
                     Page page = new Page
                     {
                         wordId = wordId,
@@ -298,6 +298,7 @@ from (
                     }
 
                     allPages.Add(page);
+                    await Task.Delay(50);
                 }
             }
 
