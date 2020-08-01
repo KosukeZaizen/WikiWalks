@@ -227,8 +227,7 @@ from (
             var con = new DBCon();
             var allPages = new List<Page>();
 
-            var min = (int)con.ExecuteSelect("select min(wordId) as min from Word;").FirstOrDefault()["min"];
-            await Task.Delay(1000 * 10);
+            var min = 2680;// 2020-08-01確認
             var max = (int)con.ExecuteSelect("select max(wordId) as max from Word;").FirstOrDefault()["max"];
 
             string sqlForCnt = "select count(*) as cnt from WordReference where targetWordId = @wordId";
