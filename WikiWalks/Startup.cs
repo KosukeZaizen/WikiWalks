@@ -310,7 +310,7 @@ from (
                         {
                             try
                             {
-                                await setAllCategoriesAsync();
+                                await allWorsGetter.setAllPagesAsync();
                             }
                             catch (Exception ex)
                             {
@@ -321,7 +321,7 @@ from (
 
                             try
                             {
-                                await allWorsGetter.setAllPagesAsync();
+                                await setAllCategoriesAsync();
                             }
                             catch (Exception ex)
                             {
