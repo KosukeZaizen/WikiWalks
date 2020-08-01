@@ -166,28 +166,7 @@ namespace WikiWalks
         private IEnumerable<Page> pages = new List<Page>();
         public AllWorsGetter()
         {
-            try
-            {
-                hurryToSetAllPages();
-
-                Task.Run(async () =>
-                {
-                    while (true)
-                    {
-                        try
-                        {
-                            await Task.Delay(1000 * 60);
-
-                            if (DateTime.Now.Minute == 30)
-                            {
-                                await setAllPagesAsync();
-                            }
-                        }
-                        catch (Exception ex) { }
-                    }
-                });
-            }
-            catch (Exception ex) { }
+            hurryToSetAllPages();
         }
 
         public IEnumerable<Page> getPages()
@@ -241,7 +220,7 @@ from (
         }
 
 
-        private async Task setAllPagesAsync()
+        public async Task setAllPagesAsync()
         {
             DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, true); //開始記録
 
@@ -325,16 +304,31 @@ from (
                 {
                     while (true)
                     {
-                        try
-                        {
-                            await Task.Delay(1000 * 60);
+                        await Task.Delay(1000 * 60);
 
-                            if (DateTime.Now.Minute == 40)
+                        if (DateTime.Now.Minute == 30)
+                        {
+                            try
                             {
                                 await setAllCategoriesAsync();
                             }
+                            catch (Exception ex)
+                            {
+                                //
+                            }
+
+                            await Task.Delay(1000 * 60 * 5);
+
+                            try
+                            {
+                                await allWorsGetter.setAllPagesAsync();
+                            }
+                            catch (Exception ex)
+                            {
+                                //
+                            }
+
                         }
-                        catch (Exception ex) { }
                     }
                 });
             }
