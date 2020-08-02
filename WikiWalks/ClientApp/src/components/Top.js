@@ -22,7 +22,7 @@ class Top extends Component {
         const getData = async () => {
 
             let previousCount = 0;
-            let i = 100;
+            let i = 50;
             while (true) {
                 const url = `api/WikiWalks/getPartialCategories?num=${i}`;
                 const response = await fetch(url);
@@ -33,9 +33,9 @@ class Top extends Component {
                 }
 
                 this.setState({ categories });
-                //await new Promise(resolve => setTimeout(() => resolve(), 100));
+                await new Promise(resolve => setTimeout(() => resolve(), 500));
 
-                i = i + 10;
+                i = i + 300;
                 previousCount = categories.length;
             }
         }
