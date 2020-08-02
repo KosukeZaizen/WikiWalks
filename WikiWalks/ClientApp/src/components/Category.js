@@ -41,7 +41,7 @@ class Category extends Component {
     componentDidMount() {
         const getData = async () => {
             try {
-                const url = `api/WikiWalks/getWordsForCategory?category=${encodeURIComponent(this.state.category)}`;
+                const url = `api/WikiWalks/getWordsForCategoryWithoutSnippet?category=${encodeURIComponent(this.state.category)}`;
                 const response = await fetch(url);
                 const pages = await response.json();
 

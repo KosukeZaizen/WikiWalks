@@ -56,6 +56,34 @@ namespace RelatedPages.Controllers
         }
 
         [HttpGet("[action]")]
+        public IEnumerable<Page> getWordsForCategoryWithoutSnippet(string category)
+        {
+            var con = new DBCon();
+            var pages = new List<Page>();
+
+            string sql = "select wordId from Category where category like @category;";
+
+            var result = con.ExecuteSelect(sql, new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, category } } });
+
+            result.ForEach((e) =>
+            {
+                var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
+                if (page != null)
+                {
+                    //カテゴリページにはSnippetが必要ないため、通信量削減のため除去
+                    pages.Add(new Page()
+                    {
+                        wordId = page.wordId,
+                        word = page.word,
+                        referenceCount = page.referenceCount
+                    });
+                }
+            });
+
+            return pages;
+        }
+
+        [HttpGet("[action]")]
         public object getWord(int wordId)
         {
             if (wordId <= 0) return "";
