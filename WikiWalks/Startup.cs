@@ -176,14 +176,12 @@ namespace WikiWalks
 
         private void hurryToSetAllPages()
         {
-            try
-            {
-                DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, true); //開始記録
+            DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, true); //開始記録
 
-                var con = new DBCon();
-                var allPages = new List<Page>();
+            var con = new DBCon();
+            var allPages = new List<Page>();
 
-                string sql = @"
+            string sql = @"
 select
 wr1.wordId,
 wr1.word,
@@ -203,27 +201,22 @@ from (
 	) as wr1
 ;";
 
-                var result = con.ExecuteSelect(sql);
+            var result = con.ExecuteSelect(sql);
 
-                result.ForEach((e) =>
-                {
-                    var page = new Page();
-                    page.wordId = (int)e["wordId"];
-                    page.word = (string)e["word"];
-                    page.referenceCount = (int)e["cnt"];
-                    page.snippet = (string)e["snippet"];
-
-                    allPages.Add(page);
-                });
-
-                pages = allPages.OrderByDescending(p => p.referenceCount).ToList();
-
-                DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, false); //終了記録
-            }
-            catch (Exception ex)
+            result.ForEach((e) =>
             {
-                hurryToSetAllPages();
-            }
+                var page = new Page();
+                page.wordId = (int)e["wordId"];
+                page.word = (string)e["word"];
+                page.referenceCount = (int)e["cnt"];
+                page.snippet = (string)e["snippet"];
+
+                allPages.Add(page);
+            });
+
+            pages = allPages.OrderByDescending(p => p.referenceCount).ToList();
+
+            DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, false); //終了記録
         }
 
 
@@ -354,14 +347,12 @@ from (
 
         private void hurryToSetAllCategories()
         {
-            try
-            {
-                DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, true); //開始記録
+            DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, true); //開始記録
 
-                var con = new DBCon();
-                var l = new List<Category>();
+            var con = new DBCon();
+            var l = new List<Category>();
 
-                var result = con.ExecuteSelect(@"
+            var result = con.ExecuteSelect(@"
 select category, count(*) as cnt 
 from Category C
 inner join (select targetWordId from WordReference group by targetWordId having count(targetWordId) > 4) as W
@@ -369,23 +360,18 @@ on W.targetWordId = C.wordId
 group by category
 ;");
 
-                result.ForEach((e) =>
-                {
-                    var c = new Category();
-                    c.category = (string)e["category"];
-                    c.cnt = (int)e["cnt"];
-
-                    l.Add(c);
-                });
-
-                categories = l.OrderByDescending(c => c.cnt).ToList();
-
-                DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, false); //終了記録
-            }
-            catch (Exception ex)
+            result.ForEach((e) =>
             {
-                hurryToSetAllCategories();
-            }
+                var c = new Category();
+                c.category = (string)e["category"];
+                c.cnt = (int)e["cnt"];
+
+                l.Add(c);
+            });
+
+            categories = l.OrderByDescending(c => c.cnt).ToList();
+
+            DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, false); //終了記録
         }
 
 

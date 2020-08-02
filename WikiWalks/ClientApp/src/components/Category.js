@@ -57,9 +57,9 @@ class Category extends Component {
                     }
 
                     this.setState({ pages });
-                    await new Promise(resolve => setTimeout(() => resolve(), 500));
+                    await new Promise(resolve => setTimeout(() => resolve(), 100));
 
-                    i = i + 300;
+                    i = i + 10;
                     previousCount = pages.length;
                 }
             } catch (e) {
