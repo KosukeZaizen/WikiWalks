@@ -52,9 +52,14 @@ namespace RelatedPages.Controllers
                     if (page != null)
                     {
                         pages.Add(page);
+
+                        if (num != 0 && pages.Count() >= num)
+                        {
+                            return pages;
+                        }
                     }
                 }
-                return num == 0 ? pages : pages.Take(num);
+                return pages;
             }
             else
             {

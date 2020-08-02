@@ -301,6 +301,12 @@ from (
 
                 Task.Run(async () =>
                 {
+                    try
+                    {
+                        await setAllCategoriesAsync();
+                    }
+                    catch (Exception ex) { }
+
                     while (true)
                     {
                         await Task.Delay(1000 * 60);
@@ -403,8 +409,10 @@ group by category
                     "select wordId from Category where category like @category;",
                     new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, c.category } } }
                     )
-                    .Where(a => pages.Any(p => p.wordId == (int)a["wordId"]))
-                    .Select(a => (int)a["wordId"]);
+                    .Select(a => pages.FirstOrDefault(p => p.wordId == (int)a["wordId"]))
+                    .Where(page => page != null)
+                    .OrderByDescending(page => page.referenceCount)
+                    .Select(page => page.wordId);
 
                 c.cnt = c.wordIds.Count();
 
