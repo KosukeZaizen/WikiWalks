@@ -399,14 +399,11 @@ group by category
                 var c = new Category();
                 c.category = cat;
 
-                c.wordIds = con.ExecuteSelect(
+                c.cnt = con.ExecuteSelect(
                     "select wordId from Category where category like @category;",
                     new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, c.category } } }
                     )
-                    .Where(a => pages.Any(p => p.wordId == (int)a["wordId"]))
-                    .Select(a => (int)a["wordId"]);
-
-                c.cnt = c.wordIds.Count();
+                .Count((a) => pages.Any(p => p.wordId == (int)a["wordId"]));
 
                 if (c.cnt > 0)
                 {

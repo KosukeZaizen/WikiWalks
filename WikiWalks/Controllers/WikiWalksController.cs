@@ -34,45 +34,25 @@ namespace RelatedPages.Controllers
         }
 
         [HttpGet("[action]")]
-        public IEnumerable<Page> getWordsForCategory(string category, int num = 0)
+        public IEnumerable<Page> getWordsForCategory(string category)
         {
             var con = new DBCon();
             var pages = new List<Page>();
 
-            var allPages = allWorsGetter.getPages();
+            string sql = "select wordId from Category where category like @category;";
 
-            //SQL実行を減らすため、キャッシュを確認
-            var wordIds = allCategoriesGetter.getCategories().FirstOrDefault(c => c.category == category)?.wordIds;
-            if (wordIds != null)
+            var result = con.ExecuteSelect(sql, new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, category } } });
+
+            result.ForEach((e) =>
             {
-                //既にカテゴリがキャッシュされている場合
-                foreach (var wordId in wordIds)
+                var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
+                if (page != null)
                 {
-                    var page = allPages.FirstOrDefault(w => w.wordId == wordId);
-                    if (page != null)
-                    {
-                        pages.Add(page);
-                    }
+                    pages.Add(page);
                 }
-                return num == 0 ? pages : pages.Take(num);
-            }
-            else
-            {
-                //まだカテゴリがキャッシュされていない場合（デプロイ直後）
-                string sql = "select wordId from Category where category like @category;";
+            });
 
-                var result = con.ExecuteSelect(sql, new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, category } } });
-
-                result.ForEach((e) =>
-                {
-                    var page = allPages.FirstOrDefault(w => w.wordId == (int)e["wordId"]);
-                    if (page != null)
-                    {
-                        pages.Add(page);
-                    }
-                });
-                return pages;
-            }
+            return pages;
         }
 
         [HttpGet("[action]")]
