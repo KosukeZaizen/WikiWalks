@@ -7,6 +7,8 @@ import Head from './Helmet';
 
 class Category extends Component {
 
+    unmounted = false;
+
     sectionStyle = {
         display: "block",
         borderTop: "1px solid #dcdcdc",
@@ -41,18 +43,34 @@ class Category extends Component {
     componentDidMount() {
         const getData = async () => {
             try {
-                const url = `api/WikiWalks/getWordsForCategory?category=${encodeURIComponent(this.state.category)}`;
-                const response = await fetch(url);
-                const pages = await response.json();
+                let previousCount = 0;
+                let i = 100;
+                while (true) {
+                    const url = `api/WikiWalks/getWordsForCategory?category=${encodeURIComponent(this.state.category)}&num=${i}`;
+                    const response = await fetch(url);
+                    const pages = await response.json();
 
-                if (!pages || pages.length <= 0) window.location.href = `/not-found?p=${window.location.pathname}`;
+                    if (!pages || pages.length <= 0) window.location.href = `/not-found?p=${window.location.pathname}`;
 
-                this.setState({ pages });
+                    if (this.unmounted || previousCount === pages.length) {
+                        break;
+                    }
+
+                    this.setState({ pages });
+                    await new Promise(resolve => setTimeout(() => resolve(), 100));
+
+                    i = i + 10;
+                    previousCount = pages.length;
+                }
             } catch (e) {
                 window.location.href = `/not-found?p=${window.location.pathname}`;
             }
         }
         getData();
+    }
+
+    componentWillUnmount() {
+        this.unmounted = true;
     }
 
     render() {
