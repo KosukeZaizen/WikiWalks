@@ -45,11 +45,10 @@ class Category extends Component {
                 const response = await fetch(url);
                 const pages = await response.json();
 
-                if (!pages || pages.length <= 0) window.location.href = `/not-found?p=${window.location.pathname}`;
-
                 this.setState({ pages });
             } catch (e) {
-                window.location.href = `/not-found?p=${window.location.pathname}`;
+                await new Promise(resolve => setTimeout(() => resolve(), 1000 * 5));
+                getData();
             }
         }
         getData();
