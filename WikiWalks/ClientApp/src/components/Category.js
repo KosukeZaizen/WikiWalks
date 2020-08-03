@@ -65,6 +65,7 @@ class Category extends Component {
                 <Head
                     title={category}
                     desc={description}
+                    noindex={true}
                 />
                 <div className="breadcrumbs" itemScope itemType="https://schema.org/BreadcrumbList" style={{ textAlign: "left" }}>
                     <span itemProp="itemListElement" itemScope itemType="http://schema.org/ListItem">

@@ -89,13 +89,14 @@ namespace WikiWalks
                     lstSitemap.Add(dicAll);
 
                     //category page
-                    IEnumerable<string> allCategories = allCategoriesGetter.getCategories().Select(c => c.category);
-                    foreach (var category in allCategories)
-                    {
-                        var dic2 = new Dictionary<string, string>();
-                        dic2["loc"] = domain + "/category/" + HttpUtility.UrlEncode(category.Replace(" ", "_")).Replace("%27", "'");
-                        lstSitemap.Add(dic2);
-                    }
+                    //カテゴリページはnoindexとし、除外
+                    //IEnumerable<string> allCategories = allCategoriesGetter.getCategories().Select(c => c.category);
+                    //foreach (var category in allCategories)
+                    //{
+                    //    var dic2 = new Dictionary<string, string>();
+                    //    dic2["loc"] = domain + "/category/" + HttpUtility.UrlEncode(category.Replace(" ", "_")).Replace("%27", "'");
+                    //    lstSitemap.Add(dic2);
+                    //}
 
                     //word page
                     IEnumerable<int> allWordId = allWorsGetter.getPages().Select(p => p.wordId);
@@ -222,6 +223,7 @@ from (
             }
             catch (Exception ex)
             {
+                System.Threading.Thread.Sleep(1000 * 60);//DBへの負荷を考慮してSleep
                 hurryToSetAllPages();
             }
         }
@@ -378,6 +380,7 @@ group by category
             }
             catch (Exception ex)
             {
+                System.Threading.Thread.Sleep(1000 * 60);//DBへの負荷を考慮してSleep
                 hurryToSetAllCategories();
             }
         }

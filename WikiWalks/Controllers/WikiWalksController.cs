@@ -36,8 +36,8 @@ namespace RelatedPages.Controllers
         [HttpGet("[action]")]
         public IEnumerable<Page> getWordsForCategory(string category)
         {
-            var con = new DBCon();
-            var pages = new List<Page>();
+            DBCon con = new DBCon();
+            List<Page> pages = new List<Page>();
 
             string sql = "select wordId from Category where category like @category;";
 
