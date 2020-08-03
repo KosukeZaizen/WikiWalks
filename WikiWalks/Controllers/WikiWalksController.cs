@@ -34,7 +34,7 @@ namespace RelatedPages.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IEnumerable<Page>> getWordsForCategory(string category)
+        public IEnumerable<Page> getWordsForCategory(string category)
         {
             var con = new DBCon();
             var pages = new List<Page>();
@@ -43,14 +43,15 @@ namespace RelatedPages.Controllers
 
             var result = con.ExecuteSelect(sql, new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, category } } });
 
-            await Task.WhenAll(result.Select(e => Task.Run(() =>
+            //急ぐ処理ではないので、Thread枯渇を考慮してTask.Runは使わない。
+            result.ForEach(e =>
             {
                 var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
                 if (page != null)
                 {
                     pages.Add(page);
                 }
-            })));
+            });
 
             return pages;
         }
