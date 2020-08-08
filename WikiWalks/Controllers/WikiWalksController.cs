@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using RelatedPages.Models;
 using System.Linq;
 using WikiWalks;
-using System.Threading.Tasks;
 
 namespace RelatedPages.Controllers
 {
@@ -95,7 +94,7 @@ namespace RelatedPages.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<object> getRelatedArticles(int wordId)
+        public object getRelatedArticles(int wordId)
         {
             if (wordId <= 0) return new { };
 
@@ -110,7 +109,7 @@ as wr
 on w.wordId = wr.sourceWordId;
 ", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
 
-            await Task.WhenAll(result.Select((e) => Task.Run(() =>
+            result.ForEach((e) =>
             {
                 var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
                 if (page == null)
@@ -122,7 +121,7 @@ on w.wordId = wr.sourceWordId;
                 }
                 page.snippet = (string)e["snippet"];
                 ps.Add(page);
-            })));
+            });
 
             var pages = ps.OrderByDescending(p => p.referenceCount).ToList();
 
@@ -130,7 +129,7 @@ on w.wordId = wr.sourceWordId;
         }
 
         [HttpGet("[action]")]
-        public async Task<object> getRelatedCategories(int wordId)
+        public object getRelatedCategories(int wordId)
         {
             if (wordId <= 0) return new { };
 
@@ -138,14 +137,14 @@ on w.wordId = wr.sourceWordId;
             var categories = new List<Category>();
 
             var result = con.ExecuteSelect("select category from Category where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
-            await Task.WhenAll(result.Select((f) => Task.Run(() =>
+            result.ForEach((f) =>
             {
                 var c = allCategoriesGetter.getCategories().FirstOrDefault(ca => ca.category == (string)f["category"]);
                 if (c != null)
                 {
                     categories.Add(c);
                 }
-            })));
+            });
 
             return new { categories };
         }
