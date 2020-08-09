@@ -14,7 +14,7 @@ namespace RelatedPages.Models
             using (var command = new SqlCommand(sql, connection))
             {
                 //参考：https://netsystem.jpn.org/t_nary/vb-net/sql-server-%E3%82%BF%E3%82%A4%E3%83%A0%E3%82%A2%E3%82%A6%E3%83%88%E9%96%A2%E9%80%A3%E3%81%AE%E8%A8%AD%E5%AE%9A/
-                command.CommandTimeout = 0; //コマンド実行タイムアウトなし
+                command.CommandTimeout = 60 * 60 * 2; //コマンド実行タイムアウト２時間
                 try
                 {
                     // パラーメータの置換
