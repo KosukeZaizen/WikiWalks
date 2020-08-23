@@ -99,7 +99,7 @@ namespace WikiWalks
                     //}
 
                     //word page
-                    allWorsGetter.decreaseNewPageNumbers();
+                    allWorsGetter.addNewPages();
                     IEnumerable<int> allWordId = allWorsGetter.getPages().Select(p => p.wordId);
                     foreach (var wordId in allWordId)
                     {
@@ -165,8 +165,8 @@ namespace WikiWalks
 
     public class AllWorsGetter
     {
-        private IEnumerable<Page> pages = new List<Page>();
-        private List<int> newPageNumbers = new List<int>();
+        private List<Page> pages = new List<Page>();
+        private List<Page> newPages = new List<Page>();
         private int randomLimit = 5;
         public AllWorsGetter()
         {
@@ -175,19 +175,21 @@ namespace WikiWalks
 
         public IEnumerable<Page> getPages()
         {
-            return pages.Where(p => !newPageNumbers.Contains(p.wordId));
+            return pages;
         }
 
-        public void decreaseNewPageNumbers()
+        public void addNewPages()
         {
             Random random = new Random();
             for (int i = 0; i < random.Next(1, randomLimit); i++)
             {
-                if (newPageNumbers.Count() > 0)
+                if (newPages.Count() > 0)
                 {
-                    newPageNumbers.RemoveAt(0);
+                    pages.Add(newPages[0]);
+                    newPages.RemoveAt(0);
                 }
             }
+            pages = pages.OrderByDescending(p => p.referenceCount).ToList();
         }
 
         private void hurryToSetAllPages()
@@ -323,7 +325,7 @@ from (
                 }
             }
 
-            int remainingNewPagesCount = newPageNumbers.Count();
+            int remainingNewPagesCount = newPages.Count();
             if (remainingNewPagesCount <= 0)
             {
                 if (randomLimit > 1)
@@ -339,12 +341,17 @@ from (
                 }
             }
 
-            //新たに追加されているページのwordIdを格納
-            newPageNumbers = allPages
-                .Where(newP => !pages.Any(oldP => oldP.wordId == newP.wordId))
-                .Select(p => p.wordId).ToList();
+            //前回と同じwordIdのページのみ更新（この時点では新規追加なし）
+            pages = allPages
+                .Where(p => pages.Any(oldPage => oldPage.wordId == p.wordId))
+                .OrderByDescending(p => p.referenceCount)
+                .ToList();
 
-            pages = allPages.OrderByDescending(p => p.referenceCount).ToList();
+            //新たに追加されているページを格納
+            //（サイトマップへの問い合わせがある度に、上記のpagesに移していく）
+            newPages = allPages
+                .Where(p => !pages.Any(oldPage => oldPage.wordId == p.wordId))
+                .ToList();
 
             DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, false); //終了記録
         }
