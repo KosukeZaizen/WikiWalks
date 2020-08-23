@@ -167,6 +167,7 @@ namespace WikiWalks
     {
         private IEnumerable<Page> pages = new List<Page>();
         private List<int> newPageNumbers = new List<int>();
+        private int randomLimit = 5;
         public AllWorsGetter()
         {
             Task.Run(() => hurryToSetAllPages());
@@ -179,9 +180,11 @@ namespace WikiWalks
 
         public void decreaseNewPageNumbers()
         {
-            if (newPageNumbers.Count() > 0) {
-                Random random = new Random();
-                for (int i = 0; i < random.Next(1, 5); i++) {
+            Random random = new Random();
+            for (int i = 0; i < random.Next(1, randomLimit); i++)
+            {
+                if (newPageNumbers.Count() > 0)
+                {
                     newPageNumbers.RemoveAt(0);
                 }
             }
@@ -317,6 +320,22 @@ from (
 
                     allPages.Add(page);
                     await Task.Delay(50);
+                }
+            }
+
+            int remainingNewPagesCount = newPageNumbers.Count();
+            if (remainingNewPagesCount <= 0)
+            {
+                if (randomLimit > 1)
+                {
+                    randomLimit--;
+                }
+            }
+            else
+            {
+                if (randomLimit < 5)
+                {
+                    randomLimit++;
                 }
             }
 
