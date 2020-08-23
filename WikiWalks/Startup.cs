@@ -353,10 +353,7 @@ from (
             //新たに追加されているページを格納
             //（サイトマップへの問い合わせがある度に、上記のpagesに移していく）
             newPages = allPages
-                .Where(p => !(
-                    pages.Any(oldPage => oldPage.wordId == p.wordId) ||
-                    newPages.Any(oldPage => oldPage.wordId == p.wordId)
-                ))
+                .Where(p => !pages.Any(oldPage => oldPage.wordId == p.wordId))
                 .ToList();
 
             DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, false); //終了記録
