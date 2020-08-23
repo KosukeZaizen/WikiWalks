@@ -99,6 +99,7 @@ namespace WikiWalks
                     //}
 
                     //word page
+                    allWorsGetter.decreaseNewPageNumbers();
                     IEnumerable<int> allWordId = allWorsGetter.getPages().Select(p => p.wordId);
                     foreach (var wordId in allWordId)
                     {
@@ -165,6 +166,7 @@ namespace WikiWalks
     public class AllWorsGetter
     {
         private IEnumerable<Page> pages = new List<Page>();
+        private List<int> newPageNumbers = new List<int>();
         public AllWorsGetter()
         {
             Task.Run(() => hurryToSetAllPages());
@@ -172,7 +174,17 @@ namespace WikiWalks
 
         public IEnumerable<Page> getPages()
         {
-            return pages;
+            return pages.Where(p => !newPageNumbers.Contains(p.wordId));
+        }
+
+        public void decreaseNewPageNumbers()
+        {
+            if (newPageNumbers.Count() > 0) {
+                Random random = new Random();
+                for (int i = 0; i < random.Next(1, 5); i++) {
+                    newPageNumbers.RemoveAt(0);
+                }
+            }
         }
 
         private void hurryToSetAllPages()
@@ -307,6 +319,11 @@ from (
                     await Task.Delay(50);
                 }
             }
+
+            //新たに追加されているページのwordIdを格納
+            newPageNumbers = allPages
+                .Where(newP => !pages.Any(oldP => oldP.wordId == newP.wordId))
+                .Select(p => p.wordId).ToList();
 
             pages = allPages.OrderByDescending(p => p.referenceCount).ToList();
 
