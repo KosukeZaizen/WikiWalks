@@ -14,6 +14,7 @@ using System.Text;
 using System.Web;
 using System;
 using System.Data;
+using System.Net.Http;
 
 namespace WikiWalks
 {
@@ -403,11 +404,30 @@ from (
                                 //
                             }
 
+                            try
+                            {
+                                //バッチが動いてなければ起動
+                                StartBatch();
+                            }
+                            catch (Exception ex)
+                            {
+                                //
+                            }
+
                         }
                     }
                 });
             }
             catch (Exception ex) { }
+        }
+
+        private async void StartBatch()
+        {
+            using (var client = new HttpClient())
+            {
+                var response = await client.GetAsync(@"https://wiki-bat.azurewebsites.net/");
+                var msg = await response.Content.ReadAsStringAsync();
+            }
         }
 
         public IEnumerable<Category> getCategories()
