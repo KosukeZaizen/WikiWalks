@@ -11,10 +11,10 @@ namespace RelatedPages.Controllers
     [Route("api/[controller]")]
     public class WikiWalksController : Controller
     {
-        private readonly AllWorsGetter allWorsGetter;
+        private readonly AllWordsGetter allWorsGetter;
         private readonly AllCategoriesGetter allCategoriesGetter;
 
-        public WikiWalksController(AllWorsGetter allWorsGetter, AllCategoriesGetter allCategoriesGetter)
+        public WikiWalksController(AllWordsGetter allWorsGetter, AllCategoriesGetter allCategoriesGetter)
         {
             this.allWorsGetter = allWorsGetter;
             this.allCategoriesGetter = allCategoriesGetter;
