@@ -371,12 +371,12 @@ class RenderOtherTable extends Component {
         }
     }
 
-    fetchData = async () => {
+    fetchData = () => setTimeout(async () => {
         const url = `api/WikiWalks/getWordsForCategory?category=${encodeURIComponent(this.props.c.category)}`;
         const response = await fetch(url);
         const pages = await response.json();
         this.setState({ pages });
-    }
+    }, 700)
 
     render() {
         const { pages } = this.state;

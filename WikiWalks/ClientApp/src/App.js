@@ -7,6 +7,7 @@ import Category from './components/Category';
 import Top from './components/Top';
 import All from './components/All';
 import NotFound from './components/404';
+import WelcomeAnimation from './components/WelcomeAnimation';
 
 export default () => (
     <Layout>
@@ -20,6 +21,7 @@ export default () => (
                 <Route component={NotFoundRedirect} />
             </Switch>
         </ScrollToTop>
+        <WelcomeAnimation />
     </Layout>
 );
 
