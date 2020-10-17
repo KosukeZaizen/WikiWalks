@@ -15,6 +15,7 @@ using System.Web;
 using System;
 using System.Data;
 using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace WikiWalks
 {
@@ -250,6 +251,27 @@ INSERT INTO Log VALUES (
             }
         }
 
+        public void setPagesForDebug()
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    using (var client = new HttpClient())
+                    {
+                        var res = await client.GetAsync(@"https://wiki.lingual-ninja.com/api/WikiWalks/getPartialWords?num=10000");
+                        var result = await res.Content.ReadAsStringAsync();
+                        pages = JsonConvert.DeserializeObject<List<Page>>(result);
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var e = ex;
+                }
+            });
+        }
+
 
         public async Task setAllPagesAsync()
         {
@@ -366,6 +388,13 @@ from (
             {
                 this.allWordsGetter = allWordsGetter;
 
+#if DEBUG
+                //デバッグ時
+                allWordsGetter.setPagesForDebug();
+                System.Threading.Thread.Sleep(1000 * 5);//5秒Sleep
+                setCategoriesForDebug();
+#else
+                //本番時
                 Task.Run(() => {
                     allWordsGetter.hurryToSetAllPages();
                     System.Threading.Thread.Sleep(1000 * 5);//DBへの負荷を考慮して5秒Sleep
@@ -414,6 +443,7 @@ from (
                         }
                     }
                 });
+#endif
             }
             catch (Exception ex) { }
         }
@@ -477,6 +507,27 @@ INSERT INTO Log VALUES (
 
                 hurryToSetAllCategories();
             }
+        }
+
+        private void setCategoriesForDebug()
+        {
+            Task.Run(async () =>
+            {
+                try
+                {
+                    using (var client = new HttpClient())
+                    {
+                        var res = await client.GetAsync(@"https://wiki.lingual-ninja.com/api/WikiWalks/getPartialCategories?num=10000");
+                        var result = await res.Content.ReadAsStringAsync();
+                        categories = JsonConvert.DeserializeObject<List<Category>>(result);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    var e = ex;
+                }
+            });
+
         }
 
 
