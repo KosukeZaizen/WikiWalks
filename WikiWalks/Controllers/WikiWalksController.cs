@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using RelatedPages.Models;
 using System.Linq;
 using WikiWalks;
+using System.Threading.Tasks;
 
 namespace RelatedPages.Controllers
 {
@@ -13,11 +14,17 @@ namespace RelatedPages.Controllers
     {
         private readonly AllWordsGetter allWorsGetter;
         private readonly AllCategoriesGetter allCategoriesGetter;
+        private static Dictionary<int, object> relatedArticlesCache;
 
         public WikiWalksController(AllWordsGetter allWorsGetter, AllCategoriesGetter allCategoriesGetter)
         {
             this.allWorsGetter = allWorsGetter;
             this.allCategoriesGetter = allCategoriesGetter;
+        }
+
+        static WikiWalksController()
+        {
+            relatedArticlesCache = new Dictionary<int, object>();
         }
 
         [HttpGet("[action]")]
@@ -98,10 +105,12 @@ namespace RelatedPages.Controllers
         {
             if (wordId <= 0) return new { };
 
-            var con = new DBCon();
-            var ps = new List<Page>();
+            Action getRelatedArticlesWithoutCache = () =>
+            {
+                var con = new DBCon();
+                var ps = new List<Page>();
 
-            var result = con.ExecuteSelect(@"
+                var result = con.ExecuteSelect(@"
 select w.wordId, w.word, wr.snippet from Word as w
 inner join
 (select top(500) sourceWordId, snippet from WordReference where targetWordId = @wordId)
@@ -109,23 +118,38 @@ as wr
 on w.wordId = wr.sourceWordId;
 ", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
 
-            result.ForEach((e) =>
-            {
-                var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
-                if (page == null)
+                result.ForEach((e) =>
                 {
-                    page = new Page();
-                    page.wordId = (int)e["wordId"];
-                    page.word = (string)e["word"];
-                    page.referenceCount = 0;
-                }
-                page.snippet = (string)e["snippet"];
-                ps.Add(page);
-            });
+                    var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
+                    if (page == null)
+                    {
+                        page = new Page();
+                        page.wordId = (int)e["wordId"];
+                        page.word = (string)e["word"];
+                        page.referenceCount = 0;
+                    }
+                    page.snippet = (string)e["snippet"];
+                    ps.Add(page);
+                });
 
-            var pages = ps.OrderByDescending(p => p.referenceCount).ToList();
+                var pages = ps.OrderByDescending(p => p.referenceCount).ToList();
 
-            return new { pages };
+                relatedArticlesCache[wordId] = new { pages };
+            };
+
+            if (relatedArticlesCache.ContainsKey(wordId))
+            {
+                Task.Run(async ()=> {
+                    await Task.Delay(5000);
+                    getRelatedArticlesWithoutCache();
+                });
+                return relatedArticlesCache[wordId];
+            }
+            else
+            {
+                getRelatedArticlesWithoutCache();
+                return relatedArticlesCache[wordId];
+            }
         }
 
         [HttpGet("[action]")]
