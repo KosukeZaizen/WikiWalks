@@ -6,7 +6,6 @@ using RelatedPages.Models;
 using System.Linq;
 using WikiWalks;
 using System.Threading.Tasks;
-using System.IO;
 using System.Text.Json;
 
 namespace RelatedPages.Controllers
