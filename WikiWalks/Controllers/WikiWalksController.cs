@@ -120,29 +120,30 @@ as wr
 on w.wordId = wr.sourceWordId;
 ", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
 
-                if (result.Count > 0)
+                result.ForEach((e) =>
                 {
-                    result.ForEach((e) =>
+                    var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
+                    if (page == null)
                     {
-                        var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
-                        if (page == null)
-                        {
-                            page = new Page();
-                            page.wordId = (int)e["wordId"];
-                            page.word = (string)e["word"];
-                            page.referenceCount = 0;
-                        }
-                        page.snippet = (string)e["snippet"];
-                        ps.Add(page);
-                    });
+                        page = new Page();
+                        page.wordId = (int)e["wordId"];
+                        page.word = (string)e["word"];
+                        page.referenceCount = 0;
+                    }
+                    page.snippet = (string)e["snippet"];
+                    ps.Add(page);
+                });
 
+                if (ps.Any(p => p.referenceCount > 0))
+                {
                     var pages = ps.OrderByDescending(p => p.referenceCount).ToList();
-
                     return JsonSerializer.Serialize(new { pages });
                 }
                 else
                 {
-                    return "";
+                    //デプロイ直後でまだallWorsGetterの準備ができていない場合は、
+                    //キャッシュテーブルに登録しない
+                    return "{}";
                 }
             };
 
@@ -158,11 +159,12 @@ where wordId = @wordId
             {
                 //キャッシュデータあり
 
-                Task.Run(async ()=> {
+                Task.Run(async () =>
+                {
                     //10秒待って再取得・更新
                     await Task.Delay(10 * 1000);
                     string json = getRelatedArticlesWithoutCache();
-                    if (json.Length > 0)
+                    if (json.Contains("pages"))
                     {
                         con.ExecuteUpdate(@"
 update RelatedArticlesCache
@@ -188,7 +190,7 @@ where wordId = @wordId
                 {
                     //2秒待って登録
                     await Task.Delay(2 * 1000);
-                    if (json.Length > 0)
+                    if (json.Contains("pages"))
                     {
                         con.ExecuteUpdate("insert into RelatedArticlesCache values(@wordId, @json, DATEADD(hour, 9, SYSDATETIME()));", new Dictionary<string, object[]> {
                             { "@json", new object[2] { SqlDbType.NVarChar, json } },
