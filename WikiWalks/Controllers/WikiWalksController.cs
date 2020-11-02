@@ -167,8 +167,7 @@ where wordId = @wordId
                     {
                         con.ExecuteUpdate(@"
 update RelatedArticlesCache
-set response = @json,
-    lastMod = DATEADD(hour, 9, SYSDATETIME())
+set response = @json
 where wordId = @wordId
 ", new Dictionary<string, object[]> {
                             { "@json", new object[2] { SqlDbType.NVarChar, json } },
@@ -184,14 +183,14 @@ where wordId = @wordId
             {
                 //キャッシュデータなし
                 string json = getRelatedArticlesWithoutCache();
-                //キャッシュデータあり
+
                 Task.Run(async () =>
                 {
                     //2秒待って登録
                     await Task.Delay(2 * 1000);
                     if (json.Contains("pages"))
                     {
-                        con.ExecuteUpdate("insert into RelatedArticlesCache values(@wordId, @json, DATEADD(hour, 9, SYSDATETIME()));", new Dictionary<string, object[]> {
+                        con.ExecuteUpdate("insert into RelatedArticlesCache values(@wordId, @json);", new Dictionary<string, object[]> {
                             { "@json", new object[2] { SqlDbType.NVarChar, json } },
                             { "@wordId", new object[2] { SqlDbType.Int, wordId } }
                         });
