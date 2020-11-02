@@ -152,19 +152,23 @@ on w.wordId = wr.sourceWordId;
 select wordId, response
 from RelatedArticlesCache
 where wordId = @wordId
-", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
+", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } }).FirstOrDefault();
 
-            if (cache.Count() > 0)
+            if (cache != null)
             {
                 //キャッシュデータあり
+                var cachedResponse = (string)cache["response"];
 
                 Task.Run(async () =>
                 {
                     //10秒待って再取得・更新
                     await Task.Delay(10 * 1000);
                     string json = getRelatedArticlesWithoutCache();
-                    if (json.Contains("pages"))
+
+                    if (json.Contains("pages") && !json.Equals(cachedResponse))
                     {
+                        //既にキャッシュされているものとの差分がある場合、キャッシュ内容をupdate
+                        await Task.Delay(2 * 1000);
                         con.ExecuteUpdate(@"
 update RelatedArticlesCache
 set response = @json
@@ -177,7 +181,7 @@ where wordId = @wordId
                 });
 
                 //上記完了を待たずに、キャッシュされていたデータを返す
-                return (string)cache.FirstOrDefault()["response"];
+                return cachedResponse;
             }
             else
             {
