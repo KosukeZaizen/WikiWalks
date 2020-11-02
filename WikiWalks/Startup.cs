@@ -214,7 +214,7 @@ from (
 	) as wr1
 ;";
 
-                var result = con.ExecuteSelect(sql);
+                var result = con.ExecuteSelect(sql, null, 60 * 60 * 6); //タイムアウト６時間
 
                 result.ForEach((e) =>
                 {
@@ -474,7 +474,7 @@ from Category C
 inner join (select targetWordId from WordReference group by targetWordId having count(targetWordId) > 4) as W
 on W.targetWordId = C.wordId 
 group by category
-;");
+;", null, 60 * 60 * 6);// タイムアウト６時間
 
                 result.ForEach((e) =>
                 {
