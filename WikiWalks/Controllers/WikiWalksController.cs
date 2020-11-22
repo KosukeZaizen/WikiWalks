@@ -57,26 +57,33 @@ namespace RelatedPages.Controllers
             return pages;
         }
 
+        public class GetWordsForCategoryWithoutSnippetResult
+        {
+            public IEnumerable<Page> pages;
+            public bool hasMore;
+        }
         [HttpGet("[action]")]
-        public IEnumerable<Page> getWordsForCategoryWithoutSnippet(string category, int top = 0)
+        public GetWordsForCategoryWithoutSnippetResult getWordsForCategoryWithoutSnippet(string category, int top = 0)
         {
             var con = new DBCon();
             var pages = new List<Page>();
+            var hasMore = false;
 
             string sql;
             List<Dictionary<string, object>> result;
-            if (top == 0)
-            {
-                sql = "select wordId from Category where category like @category;";
-                result = con.ExecuteSelect(sql, new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, category } } });
-            }
-            else
+            if (top != 0)
             {
                 sql = "select top(@top) wordId from Category where category like @category;";
                 result = con.ExecuteSelect(sql, new Dictionary<string, object[]> {
                     { "@category", new object[2] { SqlDbType.NVarChar, category } },
                     { "@top", new object[2] { SqlDbType.Int, top } }
                 });
+                hasMore = result.Count() == top;
+            }
+            else
+            {
+                sql = "select wordId from Category where category like @category;";
+                result = con.ExecuteSelect(sql, new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, category } } });
             }
 
             result.ForEach(e =>
@@ -94,7 +101,7 @@ namespace RelatedPages.Controllers
                 }
             });
 
-            return pages;
+            return new GetWordsForCategoryWithoutSnippetResult() { pages = pages, hasMore = hasMore };
         }
 
         [HttpGet("[action]")]

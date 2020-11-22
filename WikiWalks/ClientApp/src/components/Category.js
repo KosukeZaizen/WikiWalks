@@ -48,17 +48,19 @@ class Category extends Component {
                 this.state.category
             )}&top=100`;
             const response = await fetch(url);
-            const pages = await response.json();
+            const { pages, hasMore } = await response.json();
             this.setState({ pages });
 
-            await sleepAsync(1000);
+            if (hasMore) {
+                await sleepAsync(1000);
 
-            const urlAll = `api/WikiWalks/getWordsForCategoryWithoutSnippet?category=${encodeURIComponent(
-                this.state.category
-            )}`;
-            const responseAll = await fetch(urlAll);
-            const pagesAll = await responseAll.json();
-            this.setState({ pages: pagesAll });
+                const urlAll = `api/WikiWalks/getWordsForCategoryWithoutSnippet?category=${encodeURIComponent(
+                    this.state.category
+                )}`;
+                const responseAll = await fetch(urlAll);
+                const { pages } = await responseAll.json();
+                this.setState({ pages });
+            }
         };
         getData();
     }

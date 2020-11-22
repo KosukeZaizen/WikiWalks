@@ -256,7 +256,7 @@ INSERT INTO Log VALUES (
                 {
                     using (var client = new HttpClient())
                     {
-                        var res = await client.GetAsync(@"https://wiki.lingual-ninja.com/api/WikiWalks/getPartialWords?num=5000");
+                        var res = await client.GetAsync(@"https://wiki.lingual-ninja.com/api/WikiWalks/getPartialWords?num=3000");
                         var result = await res.Content.ReadAsStringAsync();
                         pages = JsonConvert.DeserializeObject<List<Page>>(result);
 
@@ -514,7 +514,7 @@ INSERT INTO Log VALUES (
                 {
                     using (var client = new HttpClient())
                     {
-                        var res = await client.GetAsync(@"https://wiki.lingual-ninja.com/api/WikiWalks/getPartialCategories?num=10000");
+                        var res = await client.GetAsync(@"https://wiki.lingual-ninja.com/api/WikiWalks/getPartialCategories?num=3000");
                         var result = await res.Content.ReadAsStringAsync();
                         categories = JsonConvert.DeserializeObject<List<Category>>(result);
                     }
