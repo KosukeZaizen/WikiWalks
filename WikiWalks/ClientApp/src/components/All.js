@@ -1,12 +1,11 @@
-import React, { Component } from 'react';
-import { bindActionCreators } from 'redux';
-import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { actionCreators } from '../store/WikiWalks';
-import Head from './Helmet';
+import React, { Component } from "react";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
+import { bindActionCreators } from "redux";
+import { actionCreators } from "../store/WikiWalks";
+import Head from "./Helmet";
 
 class Category extends Component {
-
     unmounted = false;
 
     sectionStyle = {
@@ -21,12 +20,11 @@ class Category extends Component {
 
         this.state = {
             pages: [],
-        }
+        };
     }
 
     componentDidMount() {
         const getData = async () => {
-
             let previousCount = 0;
             let i = 100;
             while (true) {
@@ -44,7 +42,7 @@ class Category extends Component {
                 i = i + 10;
                 previousCount = pages.length;
             }
-        }
+        };
         getData();
     }
 
@@ -56,25 +54,46 @@ class Category extends Component {
         const { pages } = this.state;
         const description = `This is a list of keywords from Wikipedia! Choose a keyword you are interested in!`;
         const arrDesc = description.split("! ");
-        const lineChangeDesc = arrDesc.map((d, i) => <span key={i}>{d}{i < arrDesc.length - 1 && ". "}<br /></span>);
+        const lineChangeDesc = arrDesc.map((d, i) => (
+            <span key={i}>
+                {d}
+                {i < arrDesc.length - 1 && ". "}
+                <br />
+            </span>
+        ));
         return (
             <div>
-                <Head
-                    title={"All Keywords"}
-                    desc={description}
-                />
-                <div className="breadcrumbs" itemScope itemType="https://schema.org/BreadcrumbList" style={{ textAlign: "left" }}>
-                    <span itemProp="itemListElement" itemScope itemType="http://schema.org/ListItem">
-                        <Link to="/" itemProp="item" style={{ marginRight: "5px", marginLeft: "5px" }}>
-                            <span itemProp="name">
-                                {"Home"}
-                            </span>
+                <Head title={"All Keywords"} desc={description} />
+                <div
+                    className="breadcrumbs"
+                    itemScope
+                    itemType="https://schema.org/BreadcrumbList"
+                    style={{ textAlign: "left" }}
+                >
+                    <span
+                        itemProp="itemListElement"
+                        itemScope
+                        itemType="http://schema.org/ListItem"
+                    >
+                        <Link
+                            to="/"
+                            itemProp="item"
+                            style={{ marginRight: "5px", marginLeft: "5px" }}
+                        >
+                            <span itemProp="name">{"Home"}</span>
                         </Link>
                         <meta itemProp="position" content="1" />
                     </span>
                     {" > "}
-                    <span itemProp="itemListElement" itemScope itemType="http://schema.org/ListItem">
-                        <span itemProp="name" style={{ marginRight: "5px", marginLeft: "5px" }}>
+                    <span
+                        itemProp="itemListElement"
+                        itemScope
+                        itemType="http://schema.org/ListItem"
+                    >
+                        <span
+                            itemProp="name"
+                            style={{ marginRight: "5px", marginLeft: "5px" }}
+                        >
                             {"All Keywords"}
                         </span>
                         <meta itemProp="position" content="2" />
@@ -85,26 +104,37 @@ class Category extends Component {
                     <br />
                     {lineChangeDesc}
                     <br />
-                    <table className='table table-striped'>
+                    <table className="table table-striped">
                         <thead>
                             <tr>
-                                <th style={{ verticalAlign: "middle" }}>Keywords</th>
+                                <th style={{ verticalAlign: "middle" }}>
+                                    Keywords
+                                </th>
                                 <th>Found Articles</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {pages.length > 0 ? pages.filter(page => page.referenceCount > 4).map(page =>
-                                <tr key={page.wordId}>
-                                    <td>
-                                        <Link to={"/word/" + page.wordId}>{page.word}</Link>
-                                    </td>
-                                    <td>
-                                        {page.referenceCount} pages
-                                </td>
+                            {pages.length > 0 ? (
+                                pages
+                                    .filter(page => page.referenceCount > 4)
+                                    .map(page => (
+                                        <tr key={page.wordId}>
+                                            <td>
+                                                <Link
+                                                    to={"/word/" + page.wordId}
+                                                >
+                                                    {page.word}
+                                                </Link>
+                                            </td>
+                                            <td>{page.referenceCount} pages</td>
+                                        </tr>
+                                    ))
+                            ) : (
+                                <tr>
+                                    <td>Loading...</td>
+                                    <td></td>
                                 </tr>
-                            )
-                                :
-                                <tr><td>Loading...</td><td></td></tr>}
+                            )}
                         </tbody>
                     </table>
                 </section>

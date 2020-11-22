@@ -1,7 +1,7 @@
-const initializeType = 'INITIALIZE';
-const receiveWordType = 'RECEIVE_WORD';
-const receiveCategoriesType = 'RECEIVE_CATEGORIES';
-const receivePagesType = 'RECEIVE_PAGES';
+const initializeType = "INITIALIZE";
+const receiveWordType = "RECEIVE_WORD";
+const receiveCategoriesType = "RECEIVE_CATEGORIES";
+const receivePagesType = "RECEIVE_PAGES";
 const initialState = { pages: [], categories: [], word: "Loading..." };
 
 export const actionCreators = {
@@ -11,7 +11,8 @@ export const actionCreators = {
             const response = await fetch(url);
             const { word } = await response.json();
 
-            if (!word) window.location.href = `/not-found?p=${window.location.pathname}`;
+            if (!word)
+                window.location.href = `/not-found?p=${window.location.pathname}`;
 
             dispatch({ type: receiveWordType, word });
         } catch (e) {
@@ -35,7 +36,8 @@ export const actionCreators = {
             const response = await fetch(url);
             const { pages } = await response.json();
 
-            if (!pages || pages.length < 5) window.location.href = `/not-found?p=${window.location.pathname}`;
+            if (!pages || pages.length < 5)
+                window.location.href = `/not-found?p=${window.location.pathname}`;
 
             dispatch({ type: receivePagesType, pages });
         } catch (e) {
@@ -44,7 +46,7 @@ export const actionCreators = {
     },
     initialize: () => dispatch => {
         dispatch({ type: initializeType });
-    }
+    },
 };
 
 export const reducer = (state, action) => {
