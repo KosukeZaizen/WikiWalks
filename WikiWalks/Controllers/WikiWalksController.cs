@@ -58,14 +58,26 @@ namespace RelatedPages.Controllers
         }
 
         [HttpGet("[action]")]
-        public IEnumerable<Page> getWordsForCategoryWithoutSnippet(string category)
+        public IEnumerable<Page> getWordsForCategoryWithoutSnippet(string category, int top = 0)
         {
             var con = new DBCon();
             var pages = new List<Page>();
 
-            string sql = "select wordId from Category where category like @category;";
-
-            var result = con.ExecuteSelect(sql, new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, category } } });
+            string sql;
+            List<Dictionary<string, object>> result;
+            if (top == 0)
+            {
+                sql = "select wordId from Category where category like @category;";
+                result = con.ExecuteSelect(sql, new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, category } } });
+            }
+            else
+            {
+                sql = "select top(@top) wordId from Category where category like @category;";
+                result = con.ExecuteSelect(sql, new Dictionary<string, object[]> {
+                    { "@category", new object[2] { SqlDbType.NVarChar, category } },
+                    { "@top", new object[2] { SqlDbType.Int, top } }
+                });
+            }
 
             result.ForEach(e =>
             {

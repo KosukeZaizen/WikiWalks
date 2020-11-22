@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import { bindActionCreators } from "redux";
+import { sleepAsync } from "../common/functions";
 import { actionCreators } from "../store/WikiWalks";
 import Head from "./Helmet";
 
@@ -43,20 +44,21 @@ class Category extends Component {
 
     componentDidMount() {
         const getData = async () => {
-            try {
-                const url = `api/WikiWalks/getWordsForCategoryWithoutSnippet?category=${encodeURIComponent(
-                    this.state.category
-                )}`;
-                const response = await fetch(url);
-                const pages = await response.json();
+            const url = `api/WikiWalks/getWordsForCategoryWithoutSnippet?category=${encodeURIComponent(
+                this.state.category
+            )}&top=100`;
+            const response = await fetch(url);
+            const pages = await response.json();
+            this.setState({ pages });
 
-                this.setState({ pages });
-            } catch (e) {
-                await new Promise(resolve =>
-                    setTimeout(() => resolve(), 1000 * 5)
-                );
-                getData();
-            }
+            await sleepAsync(1000);
+
+            const urlAll = `api/WikiWalks/getWordsForCategoryWithoutSnippet?category=${encodeURIComponent(
+                this.state.category
+            )}`;
+            const responseAll = await fetch(urlAll);
+            const pagesAll = await responseAll.json();
+            this.setState({ pages: pagesAll });
         };
         getData();
     }
