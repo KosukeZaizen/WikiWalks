@@ -86,7 +86,7 @@ namespace WikiWalks
                     lstSitemap.Add(dicAll);
 
                     //category page
-                    カテゴリページはnoindexとし、除外
+                    //カテゴリページはnoindexとし、除外
                     IEnumerable<string> allCategories = allCategoriesGetter.getCategories().Select(c => c.category);
                     foreach (var category in allCategories)
                     {
