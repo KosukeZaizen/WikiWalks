@@ -76,7 +76,7 @@ class PagesForTheTitles extends Component {
         const category = cat && cat.category;
         const categoryForUrl =
             category && encodeURIComponent(category.split(" ").join("_"));
-        const description = `This is a list of the Wikipedia pages about "${word}". Please check the list below to learn about "${word}"!`;
+        const description = `This is a list of Wikipedia pages about "${word}". Pages mentioned about "${word}" and pages related to "${word}" are introduced.`;
         const arrDesc = description.split(". ");
         const lineChangeDesc = arrDesc.map((d, i) => (
             <span key={i}>
