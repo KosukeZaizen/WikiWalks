@@ -78,7 +78,7 @@ class Category extends Component {
         ));
         return (
             <div>
-                <Head title={category} desc={description} noindex={true} />
+                <Head title={category} desc={description} />
                 <div
                     className="breadcrumbs"
                     itemScope

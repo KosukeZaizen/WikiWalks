@@ -86,14 +86,14 @@ namespace WikiWalks
                     lstSitemap.Add(dicAll);
 
                     //category page
-                    //カテゴリページはnoindexとし、除外
-                    //IEnumerable<string> allCategories = allCategoriesGetter.getCategories().Select(c => c.category);
-                    //foreach (var category in allCategories)
-                    //{
-                    //    var dic2 = new Dictionary<string, string>();
-                    //    dic2["loc"] = domain + "/category/" + HttpUtility.UrlEncode(category.Replace(" ", "_")).Replace("%27", "'");
-                    //    lstSitemap.Add(dic2);
-                    //}
+                    カテゴリページはnoindexとし、除外
+                    IEnumerable<string> allCategories = allCategoriesGetter.getCategories().Select(c => c.category);
+                    foreach (var category in allCategories)
+                    {
+                        var dic2 = new Dictionary<string, string>();
+                        dic2["loc"] = domain + "/category/" + HttpUtility.UrlEncode(category.Replace(" ", "_")).Replace("%27", "'");
+                        lstSitemap.Add(dic2);
+                    }
 
                     //word page
                     allWorsGetter.addNewPages();
