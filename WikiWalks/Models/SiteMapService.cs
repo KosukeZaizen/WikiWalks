@@ -28,7 +28,7 @@ namespace Z_Apps.Models.SystemBase
         }
 
 
-        public async Task<string> GetSiteMapText(
+        public string GetSiteMapText(
             bool onlyStrageXmlFile = false,
             //各ファイルの配置を書いているXMLが0番、それ以降は1番～...
             int sitemapNumber = 0

@@ -75,14 +75,14 @@ namespace WikiWalks
                 if (url.EndsWith("sitemap.xml"))
                 {
                     var siteMapService = new SiteMapService(allWorsGetter, allCategoriesGetter);
-                    string resultXML = await siteMapService.GetSiteMapText(false, 0);
+                    string resultXML = siteMapService.GetSiteMapText(false, 0);
                     await context.Response.WriteAsync(resultXML);
                 }
                 else if (Regex.IsMatch(url, "sitemap[1-9][0-9]*.xml"))
                 {
                     var siteMapService = new SiteMapService(allWorsGetter, allCategoriesGetter);
                     int number = Int32.Parse(Regex.Replace(url, @"[^0-9]", ""));
-                    string resultXML = await siteMapService.GetSiteMapText(false, number);
+                    string resultXML = siteMapService.GetSiteMapText(false, number);
                     await context.Response.WriteAsync(resultXML);
                 }
                 else
