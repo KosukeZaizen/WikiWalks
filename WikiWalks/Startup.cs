@@ -31,11 +31,6 @@ namespace WikiWalks
         }
 
         public IConfiguration Configuration { get; }
-        private readonly List<string> FunctionsToCompress = new List<string>{
-            "get50ArticlesExceptOwn",
-            "getRelatedArticles",
-            "getWordsForCategory"
-        };
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)

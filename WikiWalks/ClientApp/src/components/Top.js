@@ -31,9 +31,9 @@ class Top extends Component {
                 }
 
                 this.setState({ categories });
-                await new Promise(resolve => setTimeout(() => resolve(), 100));
+                await new Promise(resolve => setTimeout(() => resolve(), 1000 + i));
 
-                i = i + 10;
+                i = i + 100;
                 previousCount = categories.length;
             }
         };
