@@ -25,7 +25,10 @@ export const actionCreators = {
             const response = await fetch(url);
             const { categories } = await response.json();
 
-            dispatch({ type: receiveCategoriesType, categories });
+            dispatch({
+                type: receiveCategoriesType,
+                categories,
+            });
         } catch (e) {
             //
         }
@@ -54,7 +57,7 @@ export const actionCreators = {
                     const response = await fetch(url);
                     const ps = await response.json();
 
-                    const {pages} = getState().wikiWalks;
+                    const { pages } = getState().wikiWalks;
                     if (pages.length < 2) {
                         dispatch({
                             type: receivePagesType,
@@ -62,7 +65,7 @@ export const actionCreators = {
                         });
                     }
                 } catch (e) {}
-            }
+            };
             void get50Other();
 
             const url = `api/WikiWalks/getRelatedArticles?wordId=${wordId}`;

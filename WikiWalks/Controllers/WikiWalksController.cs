@@ -42,17 +42,18 @@ namespace RelatedPages.Controllers
 
             string sql = "select wordId from Category where category like @category;";
 
-            var result = con.ExecuteSelect(sql, new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, category } } });
+            var result = con.ExecuteSelect(sql, new Dictionary<string, object[]> { { "@category", new object[2] { SqlDbType.NVarChar, category } } })
+                            .Take(100);
 
             //急ぐ処理ではないので、Thread枯渇を考慮してTask.Runは使わない。
-            result.ForEach(e =>
+            foreach(var e in result)
             {
                 var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
                 if (page != null)
                 {
                     pages.Add(page);
                 }
-            });
+            }
 
             return pages;
         }
