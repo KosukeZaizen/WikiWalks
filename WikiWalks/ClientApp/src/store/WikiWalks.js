@@ -30,8 +30,25 @@ export const actionCreators = {
             //
         }
     },
-    requestPagesForTheTitle: wordId => async dispatch => {
+    requestPagesForTheTitle: wordId => async (dispatch, getState) => {
         try {
+            const getOwnArticle = async () => {
+                try {
+                    const url = `api/WikiWalks/getOwnArticle?wordId=${wordId}`;
+                    const response = await fetch(url);
+                    const page = await response.json();
+
+                    const { pages } = getState().wikiWalks;
+                    if (pages.length === 0) {
+                        dispatch({
+                            type: receivePagesType,
+                            pages: [page],
+                        });
+                    }
+                } catch (e) {}
+            };
+            void getOwnArticle();
+
             const url = `api/WikiWalks/getRelatedArticles?wordId=${wordId}`;
             const response = await fetch(url);
             const { pages } = await response.json();

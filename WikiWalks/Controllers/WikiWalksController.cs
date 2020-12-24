@@ -115,10 +115,6 @@ namespace RelatedPages.Controllers
         }
 
 
-        public class RelatedArticlesResponse
-        {
-            public IEnumerable<Page> pages;
-        }
         [HttpGet("[action]")]
         public string getRelatedArticles(int wordId)
         {
@@ -222,6 +218,45 @@ where wordId = @wordId
                 return json;
             }
         }
+
+
+        [HttpGet("[action]")]
+        public Page getOwnArticle(int wordId)
+        {
+            if (wordId <= 0) return null;
+
+            var con = new DBCon();
+
+            //自分自身の説明のデータ取得
+            var result = con.ExecuteSelect(@"
+select w.wordId, w.word, wr.snippet from Word as w
+inner join
+(select sourceWordId, snippet from WordReference where targetWordId = @wordId and sourceWordId = @wordId)
+as wr
+on w.wordId = wr.sourceWordId;
+", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } }).FirstOrDefault();
+
+            if (result == null)
+            {
+                //自分自身の説明のデータなし
+                return null;
+            }
+
+            var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)result["wordId"]);
+            if (page == null)
+            {
+                page = new Page()
+                {
+                    wordId = (int)result["wordId"],
+                    word = (string)result["word"],
+                    referenceCount = 0
+                };
+            }
+            page.snippet = (string)result["snippet"];
+
+            return page;
+        }
+
 
         [HttpGet("[action]")]
         public object getRelatedCategories(int wordId)
