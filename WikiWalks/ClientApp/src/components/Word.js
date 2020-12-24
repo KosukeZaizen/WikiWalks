@@ -290,7 +290,7 @@ function renderTable(pages, wordId, word) {
             })
             .map((page, i) => {
                 return (
-                    <tr key={i}>
+                    <tr key={page.wordId}>
                         <td
                             style={{
                                 fontWeight: "bold",

@@ -47,7 +47,23 @@ export const actionCreators = {
                     }
                 } catch (e) {}
             };
-            void getOwnArticle();
+            const get50Other = async () => {
+                await getOwnArticle();
+                try {
+                    const url = `api/WikiWalks/get50ArticlesExceptOwn?wordId=${wordId}`;
+                    const response = await fetch(url);
+                    const ps = await response.json();
+
+                    const {pages} = getState().wikiWalks;
+                    if (pages.length < 2) {
+                        dispatch({
+                            type: receivePagesType,
+                            pages: [...pages, ...ps],
+                        });
+                    }
+                } catch (e) {}
+            }
+            void get50Other();
 
             const url = `api/WikiWalks/getRelatedArticles?wordId=${wordId}`;
             const response = await fetch(url);

@@ -259,6 +259,44 @@ on w.wordId = wr.sourceWordId;
 
 
         [HttpGet("[action]")]
+        public IEnumerable<Page> get50ArticlesExceptOwn(int wordId)
+        {
+            if (wordId <= 0) return null;
+
+            var ps = new List<Page>();
+            var con = new DBCon();
+
+            var result = con.ExecuteSelect(@"
+select w.wordId, w.word, wr.snippet from Word as w
+inner join
+(select top(51) sourceWordId, snippet from WordReference where targetWordId = @wordId)
+as wr
+on w.wordId = wr.sourceWordId;
+", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
+
+            result.ForEach((e) =>
+            {
+                int wId = (int)e["wordId"];
+                if (wId != wordId)
+                {
+                    var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == wId);
+                    if (page == null)
+                    {
+                        page = new Page();
+                        page.wordId = (int)e["wordId"];
+                        page.word = (string)e["word"];
+                        page.referenceCount = 0;
+                    }
+                    page.snippet = (string)e["snippet"];
+                    ps.Add(page);
+                }
+            });
+
+            return ps;
+        }
+
+
+        [HttpGet("[action]")]
         public object getRelatedCategories(int wordId)
         {
             if (wordId <= 0) return new { };
