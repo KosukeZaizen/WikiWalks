@@ -39,7 +39,7 @@ export const actionCreators = {
                     const page = await response.json();
 
                     const { pages } = getState().wikiWalks;
-                    if (pages.length === 0) {
+                    if (pages.length === 0 && page.wordId > 0) {
                         dispatch({
                             type: receivePagesType,
                             pages: [page],
