@@ -288,7 +288,7 @@ function renderTable(pages, wordId, word) {
                     return 0;
                 }
             })
-            .map((page, i) => {
+            .map((page) => {
                 return (
                     <tr key={page.wordId}>
                         <td
