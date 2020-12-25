@@ -46,7 +46,7 @@ namespace WikiWalks
             services.AddResponseCompression(options =>
             {
                 options.EnableForHttps = true;
-                options.Providers.Add<GzipCompressionProvider>();
+                options.Providers.Add<BrotliCompressionProvider>();
             });
 
             var allWorsGetter = new AllWordsGetter();
