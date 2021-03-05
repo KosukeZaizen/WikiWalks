@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 using System;
 using System.Data;
 using System.Net.Http;
-using Newtonsoft.Json;
 using Z_Apps.Models.SystemBase;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -167,6 +166,8 @@ from (
                 });
 
                 pages = allPages.OrderByDescending(p => p.referenceCount).ToList();
+
+                AllDataCache.SaveCache(AllDataCache.Keys.WikiPages, pages);
 
                 DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, false); //終了記録
             } catch (Exception ex) {
