@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Rewrite;
-using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RelatedPages.Models;
@@ -16,6 +15,8 @@ using System.Net.Http;
 using Z_Apps.Models.SystemBase;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 
 namespace WikiWalks {
     public class Startup {
@@ -27,7 +28,7 @@ namespace WikiWalks {
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration => {
@@ -47,7 +48,7 @@ namespace WikiWalks {
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, AllWordsGetter allWorsGetter, AllCategoriesGetter allCategoriesGetter) {
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AllWordsGetter allWorsGetter, AllCategoriesGetter allCategoriesGetter) {
             if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
             } else {
@@ -81,10 +82,9 @@ namespace WikiWalks {
 
             app.UseResponseCompression();
 
-            app.UseMvc(routes => {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+            app.UseRouting();
+            app.UseEndpoints(endpoints => {
+                endpoints.MapControllerRoute("default", "{controller}/{action=Index}/{id?}");
             });
 
             app.UseSpa(spa => {

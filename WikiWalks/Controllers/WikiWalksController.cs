@@ -60,8 +60,8 @@ namespace RelatedPages.Controllers
 
         public class GetWordsForCategoryWithoutSnippetResult
         {
-            public IEnumerable<Page> pages;
-            public bool hasMore;
+            public IEnumerable<Page> pages { get; set; }
+            public bool hasMore { get; set; }
         }
         [HttpGet("[action]")]
         public GetWordsForCategoryWithoutSnippetResult getWordsForCategoryWithoutSnippet(string category, int top = 0)
