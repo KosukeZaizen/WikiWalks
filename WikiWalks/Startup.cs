@@ -18,24 +18,33 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 
-namespace WikiWalks {
-    public class Startup {
-        public Startup(IConfiguration configuration) {
+namespace WikiWalks
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration
+        {
+            get;
+        }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services) {
+        public void ConfigureServices(IServiceCollection services)
+        {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             // In production, the React files will be served from this directory
-            services.AddSpaStaticFiles(configuration => {
+            services.AddSpaStaticFiles(configuration =>
+            {
                 configuration.RootPath = "ClientApp/build";
             });
 
-            services.AddResponseCompression(options => {
+            services.AddResponseCompression(options =>
+            {
                 options.EnableForHttps = true;
                 options.Providers.Add<BrotliCompressionProvider>();
             });
@@ -48,10 +57,14 @@ namespace WikiWalks {
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AllWordsGetter allWorsGetter, AllCategoriesGetter allCategoriesGetter) {
-            if (env.IsDevelopment()) {
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, AllWordsGetter allWorsGetter, AllCategoriesGetter allCategoriesGetter)
+        {
+            if (env.IsDevelopment())
+            {
                 app.UseDeveloperExceptionPage();
-            } else {
+            }
+            else
+            {
                 app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
@@ -64,18 +77,24 @@ namespace WikiWalks {
             var options = new RewriteOptions().AddRedirect("(.*)/$", "$1");
             app.UseRewriter(options);
 
-            app.Use(async (context, next) => {
+            app.Use(async (context, next) =>
+            {
                 string url = context.Request.Path.Value;
-                if (url.EndsWith("sitemap.xml")) {
+                if (url.EndsWith("sitemap.xml"))
+                {
                     var siteMapService = new SiteMapService(allWorsGetter, allCategoriesGetter);
                     string resultXML = siteMapService.GetSiteMapText(false, 0);
                     await context.Response.WriteAsync(resultXML);
-                } else if (Regex.IsMatch(url, "sitemap[1-9][0-9]*.xml")) {
+                }
+                else if (Regex.IsMatch(url, "sitemap[1-9][0-9]*.xml"))
+                {
                     var siteMapService = new SiteMapService(allWorsGetter, allCategoriesGetter);
                     int number = Int32.Parse(Regex.Replace(url, @"[^0-9]", ""));
                     string resultXML = siteMapService.GetSiteMapText(false, number);
                     await context.Response.WriteAsync(resultXML);
-                } else {
+                }
+                else
+                {
                     await next.Invoke();
                 }
             });
@@ -83,33 +102,41 @@ namespace WikiWalks {
             app.UseResponseCompression();
 
             app.UseRouting();
-            app.UseEndpoints(endpoints => {
+            app.UseEndpoints(endpoints =>
+            {
                 endpoints.MapControllerRoute("default", "{controller}/{action=Index}/{id?}");
             });
 
-            app.UseSpa(spa => {
+            app.UseSpa(spa =>
+            {
                 spa.Options.SourcePath = "ClientApp";
 
-                if (env.IsDevelopment()) {
+                if (env.IsDevelopment())
+                {
                     spa.UseReactDevelopmentServer(npmScript: "start");
                 }
             });
         }
     }
 
-    public class AllWordsGetter {
+    public class AllWordsGetter
+    {
         private List<Page> pages = new List<Page>();
         private List<Page> newPages = new List<Page>();
         private int randomLimit = 5;
 
-        public IEnumerable<Page> getPages() {
+        public IEnumerable<Page> getPages()
+        {
             return pages;
         }
 
-        public void addNewPages() {
+        public void addNewPages()
+        {
             Random random = new Random();
-            for (int i = 0; i < random.Next(1, randomLimit); i++) {
-                if (newPages.Count() > 0) {
+            for (int i = 0; i < random.Next(1, randomLimit); i++)
+            {
+                if (newPages.Count() > 0)
+                {
                     pages.Add(newPages[0]);
                     newPages.RemoveAt(0);
                 }
@@ -117,12 +144,15 @@ namespace WikiWalks {
             pages = pages.OrderByDescending(p => p.referenceCount).ToList();
         }
 
-        public void hurryToSetAllPages() {
-            try {
+        public void hurryToSetAllPages()
+        {
+            try
+            {
                 DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, true); //開始記録
 
                 var cachedPage = AllDataCache.GetCachePage();
-                if (cachedPage != null) {
+                if (cachedPage != null)
+                {
 
                     pages = cachedPage;
 
@@ -155,7 +185,8 @@ from (
 
                 var result = con.ExecuteSelect(sql, null, 60 * 60 * 6); //タイムアウト６時間
 
-                result.ForEach((e) => {
+                result.ForEach((e) =>
+                {
                     var page = new Page();
                     page.wordId = (int)e["wordId"];
                     page.word = (string)e["word"];
@@ -170,7 +201,9 @@ from (
                 AllDataCache.SaveCache(AllDataCache.Keys.WikiPages, pages);
 
                 DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, false); //終了記録
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 System.Threading.Thread.Sleep(1000 * 60);//DBへの負荷を考慮してSleep
 
                 //DBにエラー内容書き出し
@@ -181,7 +214,8 @@ from (
         }
 
 
-        public async Task setAllPagesAsync() {
+        public async Task setAllPagesAsync()
+        {
             DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, true); //開始記録
 
             var con = new DBCon();
@@ -206,12 +240,16 @@ from (
 ;";
 
             await Task.Delay(1000 * 10);
-            for (var wordId = min; wordId <= max; wordId++) {
+            for (var wordId = min; wordId <= max; wordId++)
+            {
                 var d = wordId - min;
-                if (d < 1000) {
+                if (d < 1000)
+                {
                     //前半に大きな負荷がかかっているように見受けられるため、前半の待機を長めに
                     await Task.Delay(2003 - (d * 2));
-                } else {
+                }
+                else
+                {
                     await Task.Delay(3);
                 }
 
@@ -220,9 +258,11 @@ from (
                         new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } }
                         ).FirstOrDefault()["cnt"];
 
-                if (count > 4) {
+                if (count > 4)
+                {
                     await Task.Delay(50);
-                    Page page = new Page {
+                    Page page = new Page
+                    {
                         wordId = wordId,
                         referenceCount = count
                     };
@@ -232,7 +272,8 @@ from (
                             new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } }
                             );
                     var wordInfo = resultForEachWord.FirstOrDefault();
-                    if (wordInfo != null) {
+                    if (wordInfo != null)
+                    {
                         page.word = (string)wordInfo["word"];
                         page.snippet = (string)wordInfo["snippet"];
                     }
@@ -243,12 +284,17 @@ from (
             }
 
             int remainingNewPagesCount = newPages.Count();
-            if (remainingNewPagesCount <= 0) {
-                if (randomLimit > 1) {
+            if (remainingNewPagesCount <= 0)
+            {
+                if (randomLimit > 1)
+                {
                     randomLimit--;
                 }
-            } else {
-                if (randomLimit < 5) {
+            }
+            else
+            {
+                if (randomLimit < 5)
+                {
                     randomLimit++;
                 }
             }
@@ -274,15 +320,19 @@ from (
         }
     }
 
-    public class AllCategoriesGetter {
+    public class AllCategoriesGetter
+    {
         private IEnumerable<Category> categories = new List<Category>();
         private AllWordsGetter allWordsGetter;
 
-        public AllCategoriesGetter(AllWordsGetter allWordsGetter) {
-            try {
+        public AllCategoriesGetter(AllWordsGetter allWordsGetter)
+        {
+            try
+            {
                 this.allWordsGetter = allWordsGetter;
 
-                Task.Run(() => {
+                Task.Run(() =>
+                {
                     allWordsGetter.hurryToSetAllPages();
                     System.Threading.Thread.Sleep(1000 * 5);//DBへの負荷を考慮して5秒Sleep
                     hurryToSetAllCategories();
@@ -293,58 +343,78 @@ from (
                 return;
 #endif
 
-                Task.Run(async () => {
+                Task.Run(async () =>
+                {
                     await Task.Delay(1000 * 60 * 30);
 
-                    while (true) {
+                    while (true)
+                    {
                         await Task.Delay(1000 * 60);
 
-                        if (DateTime.Now.Minute == 30) {
-                            try {
+                        if (DateTime.Now.Minute == 30)
+                        {
+                            try
+                            {
                                 await allWordsGetter.setAllPagesAsync();
-                            } catch (Exception ex) {
+                            }
+                            catch (Exception ex)
+                            {
                                 ErrorLog.InsertErrorLog("allWordsGetter.setAllPagesAsync(); " + ex.Message);
                             }
 
                             await Task.Delay(1000 * 60 * 5);
 
-                            try {
+                            try
+                            {
                                 await setAllCategoriesAsync();
-                            } catch (Exception ex) {
+                            }
+                            catch (Exception ex)
+                            {
                                 ErrorLog.InsertErrorLog("setAllCategoriesAsync(); " + ex.Message);
                             }
 
-                            try {
+                            try
+                            {
                                 //バッチが動いてなければ起動
                                 StartBatch();
-                            } catch (Exception ex) {
+                            }
+                            catch (Exception ex)
+                            {
                                 ErrorLog.InsertErrorLog("バッチが動いてなければ起動 " + ex.Message);
                             }
                         }
                     }
                 });
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 ErrorLog.InsertErrorLog(ex.Message);
             }
         }
 
-        private async void StartBatch() {
-            using (var client = new HttpClient()) {
+        private async void StartBatch()
+        {
+            using (var client = new HttpClient())
+            {
                 HttpResponseMessage response = await client.GetAsync(@"https://wiki-bat.azurewebsites.net/");
                 string msg = await response.Content.ReadAsStringAsync();
             }
         }
 
-        public IEnumerable<Category> getCategories() {
+        public IEnumerable<Category> getCategories()
+        {
             return categories;
         }
 
-        private void hurryToSetAllCategories() {
-            try {
+        private void hurryToSetAllCategories()
+        {
+            try
+            {
                 DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, true); //開始記録
 
                 var cachedCategory = AllDataCache.GetCacheCategory();
-                if (cachedCategory != null) {
+                if (cachedCategory != null)
+                {
 
                     categories = cachedCategory;
 
@@ -363,7 +433,8 @@ on W.targetWordId = C.wordId
 group by category
 ;", null, 60 * 60 * 6);// タイムアウト６時間
 
-                result.ForEach((e) => {
+                result.ForEach((e) =>
+                {
                     var c = new Category();
                     c.category = (string)e["category"];
                     c.cnt = (int)e["cnt"];
@@ -376,7 +447,9 @@ group by category
                 AllDataCache.SaveCache(AllDataCache.Keys.WikiCategory, categories);
 
                 DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, false); //終了記録
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 System.Threading.Thread.Sleep(1000 * 60);//DBへの負荷を考慮してSleep
 
                 //DBにエラー内容書き出し
@@ -389,7 +462,8 @@ group by category
         }
 
 
-        private async Task setAllCategoriesAsync() {
+        private async Task setAllCategoriesAsync()
+        {
             DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, true); //開始記録
 
             var con = new DBCon();
@@ -398,18 +472,21 @@ group by category
             var pages = allWordsGetter.getPages().ToList();
 
             var hashCategories = new HashSet<string>();
-            foreach (var page in pages) {
+            foreach (var page in pages)
+            {
                 await Task.Delay(10);
                 con.ExecuteSelect(
                         "select category from Category where wordId = @wordId;",
                         new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, page.wordId } } }
-                ).ForEach(cat => {
+                ).ForEach(cat =>
+                {
                     hashCategories.Add((string)cat["category"]);
                 });
             }
 
             await Task.Delay(1000 * 45);
-            foreach (var cat in hashCategories) {
+            foreach (var cat in hashCategories)
+            {
                 await Task.Delay(10);
 
                 var c = new Category();
@@ -421,7 +498,8 @@ group by category
                     )
                 .Count((a) => pages.Any(p => p.wordId == (int)a["wordId"]));
 
-                if (c.cnt > 0) {
+                if (c.cnt > 0)
+                {
                     l.Add(c);
                 }
             }
