@@ -153,53 +153,8 @@ namespace WikiWalks
                 var cachedPage = AllDataCache.GetCachePage();
                 if (cachedPage != null)
                 {
-
                     pages = cachedPage;
-
-                    DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, false); //終了記録
-                    return;
                 }
-
-                var con = new DBCon();
-                var allPages = new List<Page>();
-
-                string sql = @"
-select
-wr1.wordId,
-wr1.word,
-wr1.cnt,
-isnull(
-	(select top(1) snippet from WordReference wr3 where wr3.sourceWordId = wr3.targetWordId and wr3.sourceWordId = wr1.wordId),
-	(select top(1) snippet from WordReference wr2 where wr2.sourceWordId = wr1.wordId)
-) as snippet
-from (
-		select w.wordId, w.word, wr.cnt from Word as w
-		inner join (
-			select targetWordId, count(targetWordId) cnt
-			from WordReference
-			group by targetWordId having count(targetWordId) > 4
-		) as wr
-		on w.wordId = wr.targetWordId
-	) as wr1
-;";
-
-                var result = con.ExecuteSelect(sql, null, 60 * 60 * 6); //タイムアウト６時間
-
-                result.ForEach((e) =>
-                {
-                    var page = new Page();
-                    page.wordId = (int)e["wordId"];
-                    page.word = (string)e["word"];
-                    page.referenceCount = (int)e["cnt"];
-                    page.snippet = (string)e["snippet"];
-
-                    allPages.Add(page);
-                });
-
-                pages = allPages.OrderByDescending(p => p.referenceCount).ToList();
-
-                AllDataCache.SaveCache(AllDataCache.Keys.WikiPages, pages);
-
                 DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, false); //終了記録
             }
             catch (Exception ex)
@@ -239,18 +194,18 @@ from (
 ) as wr1
 ;";
 
-            await Task.Delay(1000 * 10);
+            await Task.Delay(1000 * 20);
             for (var wordId = min; wordId <= max; wordId++)
             {
                 var d = wordId - min;
                 if (d < 1000)
                 {
                     //前半に大きな負荷がかかっているように見受けられるため、前半の待機を長めに
-                    await Task.Delay(2003 - (d * 2));
+                    await Task.Delay(2100 - (d * 2));
                 }
                 else
                 {
-                    await Task.Delay(3);
+                    await Task.Delay(100);
                 }
 
                 int count = (int)con.ExecuteSelect(
@@ -260,7 +215,7 @@ from (
 
                 if (count > 4)
                 {
-                    await Task.Delay(50);
+                    await Task.Delay(200);
                     Page page = new Page
                     {
                         wordId = wordId,
@@ -279,7 +234,7 @@ from (
                     }
 
                     allPages.Add(page);
-                    await Task.Delay(50);
+                    await Task.Delay(200);
                 }
             }
 
@@ -415,37 +370,8 @@ from (
                 var cachedCategory = AllDataCache.GetCacheCategory();
                 if (cachedCategory != null)
                 {
-
                     categories = cachedCategory;
-
-                    DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, false); //終了記録
-                    return;
                 }
-
-                var con = new DBCon();
-                var l = new List<Category>();
-
-                var result = con.ExecuteSelect(@"
-select category, count(*) as cnt 
-from Category C
-inner join (select targetWordId from WordReference group by targetWordId having count(targetWordId) > 4) as W
-on W.targetWordId = C.wordId 
-group by category
-;", null, 60 * 60 * 6);// タイムアウト６時間
-
-                result.ForEach((e) =>
-                {
-                    var c = new Category();
-                    c.category = (string)e["category"];
-                    c.cnt = (int)e["cnt"];
-
-                    l.Add(c);
-                });
-
-                categories = l.OrderByDescending(c => c.cnt).ToList();
-
-                AllDataCache.SaveCache(AllDataCache.Keys.WikiCategory, categories);
-
                 DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, false); //終了記録
             }
             catch (Exception ex)
