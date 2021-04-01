@@ -400,7 +400,7 @@ from (
             var hashCategories = new HashSet<string>();
             foreach (var page in pages)
             {
-                await Task.Delay(10);
+                await Task.Delay(30);
                 con.ExecuteSelect(
                         "select category from Category where wordId = @wordId;",
                         new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, page.wordId } } }
@@ -413,7 +413,7 @@ from (
             await Task.Delay(1000 * 45);
             foreach (var cat in hashCategories)
             {
-                await Task.Delay(10);
+                await Task.Delay(30);
 
                 var c = new Category();
                 c.category = cat;
