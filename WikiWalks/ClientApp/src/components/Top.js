@@ -19,23 +19,11 @@ class Top extends Component {
 
     componentDidMount() {
         const getData = async () => {
-            let previousCount = 0;
-            let i = 100;
-            while (true) {
-                const url = `api/WikiWalks/getPartialCategories?num=${i}`;
-                const response = await fetch(url);
-                const categories = await response.json();
+            const url = `api/WikiWalks/getJapaneseCategories`;
+            const response = await fetch(url);
+            const categories = await response.json();
 
-                if (this.unmounted || previousCount === categories.length) {
-                    break;
-                }
-
-                this.setState({ categories });
-                await new Promise(resolve => setTimeout(() => resolve(), 1000 + i));
-
-                i = i + 100;
-                previousCount = categories.length;
-            }
+            this.setState({ categories });
         };
         getData();
     }

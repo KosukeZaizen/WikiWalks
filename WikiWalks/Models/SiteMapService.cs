@@ -9,6 +9,8 @@ using System.Xml.Linq;
 using System.Runtime.Serialization.Json;
 using System.IO;
 using WikiWalks;
+using RelatedPages.Models;
+using System.Data;
 
 namespace Z_Apps.Models.SystemBase
 {
@@ -55,8 +57,9 @@ namespace Z_Apps.Models.SystemBase
                     lstSitemap.Add(dicAll);
 
                     //category page
-                    //カテゴリページはnoindexとし、除外
-                    IEnumerable<string> allCategories = allCategoriesGetter.getCategories().Select(c => c.category);
+                    IEnumerable<string> allCategories = allCategoriesGetter
+                        .getJapaneseCategories()
+                        .Select(c => c.category);
                     foreach (var category in allCategories)
                     {
                         var dic2 = new Dictionary<string, string>();
@@ -66,7 +69,11 @@ namespace Z_Apps.Models.SystemBase
 
                     //word page
                     allWorsGetter.addNewPages();
-                    IEnumerable<int> allWordId = allWorsGetter.getPages().Select(p => p.wordId);
+                    IEnumerable<int> allWordId = allWorsGetter
+                            .getPages()
+                            .Where(p => p.isAboutJapan == true)
+                            .Select(p => p.wordId);
+
                     foreach (var wordId in allWordId)
                     {
                         var dicWordId = new Dictionary<string, string>();

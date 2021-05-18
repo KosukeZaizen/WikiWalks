@@ -82,7 +82,11 @@ class Category extends Component {
         ));
         return (
             <div>
-                <Head title={category} desc={description} />
+                <Head
+                    title={category}
+                    desc={description}
+                    noindex={!(category || "").toLowerCase().includes("japan")}
+                />
                 <div
                     className="breadcrumbs"
                     itemScope

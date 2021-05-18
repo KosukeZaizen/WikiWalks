@@ -17,6 +17,7 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
+using RelatedPages.Controllers;
 
 namespace WikiWalks
 {
@@ -269,8 +270,6 @@ from (
                 .Where(p => !pages.Any(oldPage => oldPage.wordId == p.wordId))
                 .ToList();
 
-            AllDataCache.SaveCache(AllDataCache.Keys.WikiPages, allPages);
-
             DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, false); //終了記録
         }
     }
@@ -278,6 +277,7 @@ from (
     public class AllCategoriesGetter
     {
         private IEnumerable<Category> categories = new List<Category>();
+        private IEnumerable<Category> japaneseCategories = new List<Category>();
         private AllWordsGetter allWordsGetter;
 
         public AllCategoriesGetter(AllWordsGetter allWordsGetter)
@@ -361,6 +361,10 @@ from (
             return categories;
         }
 
+        public IEnumerable<Category> getJapaneseCategories()
+        {
+            return japaneseCategories;
+        }
         private void hurryToSetAllCategories()
         {
             try
@@ -371,6 +375,8 @@ from (
                 if (cachedCategory != null)
                 {
                     categories = cachedCategory;
+                    japaneseCategories = cachedCategory
+                        .Where(c => c.category.ToLower().Contains("japan"));
                 }
                 DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, false); //終了記録
             }
@@ -401,13 +407,20 @@ from (
             foreach (var page in pages)
             {
                 await Task.Delay(30);
+                var isAboutJapan = false;
                 con.ExecuteSelect(
                         "select category from Category where wordId = @wordId;",
                         new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, page.wordId } } }
                 ).ForEach(cat =>
                 {
-                    hashCategories.Add((string)cat["category"]);
+                    var categ = (string)cat["category"];
+                    if (categ.ToLower().Contains("japan"))
+                    {
+                        isAboutJapan = true;
+                    }
+                    hashCategories.Add(categ);
                 });
+                page.isAboutJapan = isAboutJapan;
             }
 
             await Task.Delay(1000 * 45);
@@ -431,8 +444,11 @@ from (
             }
 
             categories = l.OrderByDescending(c => c.cnt).ToList();
+            japaneseCategories = categories
+                .Where(c => c.category.ToLower().Contains("japan"));
 
             AllDataCache.SaveCache(AllDataCache.Keys.WikiCategory, categories);
+            AllDataCache.SaveCache(AllDataCache.Keys.WikiPages, pages);
 
             DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, false); //終了記録
         }

@@ -25,13 +25,22 @@ namespace RelatedPages.Controllers
         [HttpGet("[action]")]
         public IEnumerable<Page> getPartialWords(int num)
         {
-            return allWorsGetter.getPages().Take(num);
+            return allWorsGetter
+                        .getPages()
+                        .Where(p => p.isAboutJapan == true)
+                        .Take(num);
         }
 
         [HttpGet("[action]")]
         public IEnumerable<object> getPartialCategories(int num)
         {
             return allCategoriesGetter.getCategories().Take(num);
+        }
+
+        [HttpGet("[action]")]
+        public IEnumerable<object> getJapaneseCategories()
+        {
+            return allCategoriesGetter.getJapaneseCategories();
         }
 
         [HttpGet("[action]")]
@@ -46,7 +55,7 @@ namespace RelatedPages.Controllers
                             .Take(100);
 
             //急ぐ処理ではないので、Thread枯渇を考慮してTask.Runは使わない。
-            foreach(var e in result)
+            foreach (var e in result)
             {
                 var page = allWorsGetter.getPages().FirstOrDefault(w => w.wordId == (int)e["wordId"]);
                 if (page != null)
@@ -300,6 +309,11 @@ on w.wordId = wr.sourceWordId;
         [HttpGet("[action]")]
         public object getRelatedCategories(int wordId)
         {
+            return _getRelatedCategories(wordId);
+        }
+
+        public object _getRelatedCategories(int wordId)
+        {
             if (wordId <= 0) return new { };
 
             var con = new DBCon();
@@ -308,7 +322,9 @@ on w.wordId = wr.sourceWordId;
             var result = con.ExecuteSelect("select category from Category where wordId = @wordId;", new Dictionary<string, object[]> { { "@wordId", new object[2] { SqlDbType.Int, wordId } } });
             result.ForEach((f) =>
             {
-                var c = allCategoriesGetter.getCategories().FirstOrDefault(ca => ca.category == (string)f["category"]);
+                var c = allCategoriesGetter
+                            .getCategories()
+                            .FirstOrDefault(ca => ca.category == (string)f["category"]);
                 if (c != null)
                 {
                     categories.Add(c);

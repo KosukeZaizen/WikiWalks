@@ -69,7 +69,10 @@ class PagesForTheTitles extends Component {
         const isWide = this.state.screenWidth > 991;
 
         const wordId = Number(this.props.match.params.wordId.split("#")[0]);
-        const { pages, categories } = this.props;
+        const { pages, categories: originCat } = this.props;
+        const categories = originCat.filter(c =>
+            c.category.toLowerCase().includes("japan")
+        );
         const word = this.props.word || "Loading...";
         const cat =
             categories &&
@@ -90,7 +93,11 @@ class PagesForTheTitles extends Component {
 
         return (
             <div>
-                <Head title={word} desc={description} />
+                <Head
+                    title={word}
+                    desc={description}
+                    noindex={categories.length <= 0}
+                />
                 <div
                     className="breadcrumbs"
                     itemScope
