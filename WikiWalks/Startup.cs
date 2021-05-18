@@ -255,20 +255,43 @@ from (
                 }
             }
 
-            //前回と同じwordIdのページのみ更新（この時点では新規追加なし）
-            pages = allPages
-                .Where(p =>
-                    pages.Any(oldPage => oldPage.wordId == p.wordId) ||
-                    newPages.Any(oldPage => oldPage.wordId == p.wordId)
-                )
-                .OrderByDescending(p => p.referenceCount)
-                .ToList();
+            var pagesWithJapan = new List<Page>();
+            var pagesWithoutJapan = new List<Page>();
+            foreach (var newPage in allPages)
+            {
+                // 前のpagesに既に同じものがあるか
+                var oldSamePage = pages
+                                    .FirstOrDefault(pa => pa.wordId == newPage.wordId);
+                if (oldSamePage != null)
+                {
+                    newPage.isAboutJapan = oldSamePage.isAboutJapan;
+                    pagesWithJapan.Add(newPage);
+                }
+                else
+                {
+                    // １つ前のnewPagesに既に同じものがあるか
+                    var previousSamePage = newPages
+                                    .FirstOrDefault(pa => pa.wordId == newPage.wordId);
+                    if (previousSamePage != null)
+                    {
+                        newPage.isAboutJapan = previousSamePage.isAboutJapan;
+                        pagesWithJapan.Add(newPage);
+                    }
+                    else
+                    {
+                        // 今回初めて取得したページ
+                        pagesWithoutJapan.Add(newPage);
+                    }
+                }
+            }
+
+            pages = pagesWithJapan
+                        .OrderByDescending(p => p.referenceCount)
+                        .ToList();
 
             //新たに追加されているページを格納
             //（サイトマップへの問い合わせがある度に、上記のpagesに移していく）
-            newPages = allPages
-                .Where(p => !pages.Any(oldPage => oldPage.wordId == p.wordId))
-                .ToList();
+            newPages = pagesWithoutJapan;
 
             DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, false); //終了記録
         }
