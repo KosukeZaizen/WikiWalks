@@ -7,6 +7,7 @@ import Layout from "./components/Layout";
 import ScrollToTop from "./components/ScrollToTop";
 import Top from "./components/Top";
 import Word from "./components/Word";
+import { PopupAd } from "./components/YouTubeAd/Popup";
 
 export default () => (
     <Layout>
@@ -24,6 +25,7 @@ export default () => (
                 <Route component={NotFoundRedirect} />
             </Switch>
         </ScrollToTop>
+        <PopupAd />
     </Layout>
 );
 

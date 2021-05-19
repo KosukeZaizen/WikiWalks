@@ -16,7 +16,7 @@ export default function NavMenu() {
                         to="/"
                         style={{ fontWeight: "bold" }}
                     >
-                        Wiki Ninja
+                        Japan Info
                     </NavbarBrand>
                 </Container>
             </Navbar>

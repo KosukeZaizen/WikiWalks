@@ -67,19 +67,19 @@ class Category extends Component {
 
     render() {
         const { pages, category } = this.state;
-        const description = `This is a list of the keywords about "${
-            category ? category.split('"').join("") : "..."
-        }". Please check the words below to learn about "${
-            category ? category.split('"').join("") : "..."
-        }"!`;
-        const arrDesc = description.split(". ");
-        const lineChangeDesc = arrDesc.map((d, i) => (
-            <span key={i}>
-                {d}
-                {i < arrDesc.length - 1 && ". "}
+        const strCat = category ? category.split('"').join("") : "...";
+        const description = `This is a list of the keywords about ${strCat}. Please check the words below to learn about ${strCat}!`;
+        const lineChangeDesc = (
+            <div>
+                {"This is a list of the keywords about "}
+                <span style={{ fontWeight: "bold" }}>{strCat}</span>
+                {"."}
                 <br />
-            </span>
-        ));
+                {"Please check the words below to learn about "}
+                <span style={{ fontWeight: "bold" }}>{strCat}</span>
+                {"!"}
+            </div>
+        );
         return (
             <div>
                 <Head

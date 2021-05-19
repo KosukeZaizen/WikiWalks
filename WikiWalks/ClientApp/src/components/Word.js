@@ -7,6 +7,7 @@ import { bindActionCreators } from "redux";
 import { actionCreators } from "../store/WikiWalks";
 import GoogleAd from "./GoogleAd";
 import Head from "./Helmet";
+import { YouTubeAd } from "./YouTubeAd";
 
 class PagesForTheTitles extends Component {
     sectionStyle = {
@@ -80,15 +81,20 @@ class PagesForTheTitles extends Component {
         const category = cat && cat.category;
         const categoryForUrl =
             category && encodeURIComponent(category.split(" ").join("_"));
-        const description = `This is a list of Wikipedia pages about "${word}". Pages mentioned about "${word}" and pages related to "${word}" are introduced.`;
-        const arrDesc = description.split(". ");
-        const lineChangeDesc = arrDesc.map((d, i) => (
-            <span key={i}>
-                {d}
-                {i < arrDesc.length - 1 && ". "}
+        const description = `This is a list of Wikipedia pages about ${word}. Pages mentioned about ${word} and pages related to ${word} are introduced.`;
+        const lineChangeDesc = (
+            <div style={{ lineHeight: 1.7 }}>
+                {"This is a list of Wikipedia pages about "}
+                <span style={{ fontWeight: "bold" }}>{word}</span>
+                {"."}
                 <br />
-            </span>
-        ));
+                {"Pages mentioned about "}
+                <span style={{ fontWeight: "bold" }}>{word}</span>
+                {" and pages related to "}
+                <span style={{ fontWeight: "bold" }}>{word}</span>
+                {" are introduced."}
+            </div>
+        );
         const showAd = pages && pages.length > 50;
 
         return (
@@ -233,14 +239,17 @@ class PagesForTheTitles extends Component {
                                 )}
                             </div>
                         )}
-                        {showAd && (
-                            <GoogleAd
-                                style={{
-                                    width: "100%",
-                                    marginBottom: isWide ? 0 : 30,
-                                }}
-                            />
-                        )}
+                        <div
+                            style={{
+                                maxWidth: 400,
+                                marginBottom: isWide ? 0 : 30,
+                                ...(isWide
+                                    ? { position: "relative", top: -10 }
+                                    : {}),
+                            }}
+                        >
+                            <YouTubeAd />
+                        </div>
                     </div>
                     <section style={this.sectionStyle}>
                         <h2

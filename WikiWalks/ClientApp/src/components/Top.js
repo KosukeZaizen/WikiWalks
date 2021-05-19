@@ -37,20 +37,20 @@ class Top extends Component {
         return (
             <div>
                 <Head
-                    title={"Wiki Ninja"}
+                    title={"Japan Info"}
                     desc={
                         "This website introduces you to articles of Wikipedia for each category!"
                     }
                     noad
                 />
-                <h1>Welcome to Wiki Ninja!</h1>
+                <h1>Welcome to Japan Info!</h1>
                 <br />
                 <p>
-                    Do you know Wikipedia? It is the best online dictionary in
-                    the world!
+                    This is a website to list information about Japan!
                     <br />
-                    This website introduces you to articles of Wikipedia for
-                    each category!
+                    You can check a lot of information about Japan!
+                    <br />
+                    Information is from Wikipedia!
                 </p>
                 <br />
                 <table className="table table-striped">
