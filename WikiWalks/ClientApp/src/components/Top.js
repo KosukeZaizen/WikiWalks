@@ -39,7 +39,7 @@ class Top extends Component {
                 <Head
                     title={"Japan Info"}
                     desc={
-                        "This website introduces you to articles of Wikipedia for each category!"
+                        "This is a website to list information about Japan! You can check a lot of information about Japan!"
                     }
                     noad
                 />
