@@ -149,14 +149,11 @@ namespace WikiWalks
         {
             try
             {
-                DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, true); //開始記録
-
                 var cachedPage = AllDataCache.GetCachePage();
                 if (cachedPage != null)
                 {
                     pages = cachedPage;
                 }
-                DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enPage, false); //終了記録
             }
             catch (Exception ex)
             {
@@ -195,18 +192,18 @@ from (
 ) as wr1
 ;";
 
-            await Task.Delay(1000 * 20);
+            await Task.Delay(1000 * 30);
             for (var wordId = min; wordId <= max; wordId++)
             {
                 var d = wordId - min;
                 if (d < 1000)
                 {
                     //前半に大きな負荷がかかっているように見受けられるため、前半の待機を長めに
-                    await Task.Delay(2100 - (d * 2));
+                    await Task.Delay(2500 - (d * 2));
                 }
                 else
                 {
-                    await Task.Delay(100);
+                    await Task.Delay(500);
                 }
 
                 int count = (int)con.ExecuteSelect(
@@ -216,7 +213,7 @@ from (
 
                 if (count > 4)
                 {
-                    await Task.Delay(200);
+                    await Task.Delay(500);
                     Page page = new Page
                     {
                         wordId = wordId,
@@ -235,7 +232,7 @@ from (
                     }
 
                     allPages.Add(page);
-                    await Task.Delay(200);
+                    await Task.Delay(500);
                 }
             }
 
@@ -392,8 +389,6 @@ from (
         {
             try
             {
-                DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, true); //開始記録
-
                 var cachedCategory = AllDataCache.GetCacheCategory();
                 if (cachedCategory != null)
                 {
@@ -401,7 +396,6 @@ from (
                     japaneseCategories = cachedCategory
                         .Where(c => c.category.ToLower().Contains("japan"));
                 }
-                DB_Util.RegisterLastTopUpdate(DB_Util.procTypes.enCategory, false); //終了記録
             }
             catch (Exception ex)
             {
@@ -429,7 +423,7 @@ from (
             var hashCategories = new HashSet<string>();
             foreach (var page in pages)
             {
-                await Task.Delay(30);
+                await Task.Delay(500);
                 var isAboutJapan = false;
                 con.ExecuteSelect(
                         "select category from Category where wordId = @wordId;",
@@ -449,7 +443,7 @@ from (
             await Task.Delay(1000 * 45);
             foreach (var cat in hashCategories)
             {
-                await Task.Delay(30);
+                await Task.Delay(500);
 
                 var c = new Category();
                 c.category = cat;
