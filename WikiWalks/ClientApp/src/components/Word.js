@@ -94,10 +94,12 @@ class PagesForTheTitles extends Component {
         if (pages) {
             const page = pages.find(p => p.wordId === wordId);
             if (page) {
-                description =
-                    Object.keys(patterns).reduce((acc, key) => {
-                        return acc.split(key).join(patterns[key]);
-                    }, page.snippet) + "...";
+                if (page.snippet) {
+                    description =
+                        Object.keys(patterns).reduce((acc, key) => {
+                            return acc.split(key).join(patterns[key]);
+                        }, page.snippet) + "...";
+                }
             }
         }
 
