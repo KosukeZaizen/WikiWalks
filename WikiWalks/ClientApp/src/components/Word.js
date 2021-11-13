@@ -95,11 +95,10 @@ class PagesForTheTitles extends Component {
             const page = pages.find(p => p.wordId === wordId);
             if (page) {
                 if (page.snippet) {
-                    const snippet =
+                    description =
                         Object.keys(patterns).reduce((acc, key) => {
                             return acc.split(key).join(patterns[key]);
                         }, page.snippet) + "...";
-                    description = `List of pages about "${word}" in Wikipedia: "${snippet}"`;
                 }
             }
         }
