@@ -9,15 +9,6 @@ import GoogleAd from "./GoogleAd";
 import Head from "./Helmet";
 import { YouTubeAd } from "./YouTubeAd";
 
-const patterns = {
-    "&lt;": "<",
-    "&gt;": ">",
-    "&amp;": "&",
-    "&quot;": '"',
-    "&#x27;": "'",
-    "&#x60;": "`",
-};
-
 class PagesForTheTitles extends Component {
     sectionStyle = {
         display: "block",
@@ -90,17 +81,7 @@ class PagesForTheTitles extends Component {
         const category = cat && cat.category;
         const categoryForUrl =
             category && encodeURIComponent(category.split(" ").join("_"));
-        let description = `This is a list of Wikipedia pages about ${word}. Pages mentioned about ${word} and pages related to ${word} are introduced.`;
-        if (pages) {
-            const page = pages.find(p => p.wordId === wordId);
-            if (page) {
-                description =
-                    Object.keys(patterns).reduce((acc, key) => {
-                        return acc.split(key).join(patterns[key]);
-                    }, page.snippet) + "...";
-            }
-        }
-
+        const description = `This is a list of Wikipedia pages about ${word}. Pages mentioned about ${word} and pages related to ${word} are introduced.`;
         const lineChangeDesc = (
             <div style={{ lineHeight: 1.7 }}>
                 {"This is a list of Wikipedia pages about "}
@@ -351,6 +332,14 @@ function renderTable(pages, wordId, word) {
                             }}
                         >
                             {page.snippet.split(" ").map((s, j) => {
+                                const patterns = {
+                                    "&lt;": "<",
+                                    "&gt;": ">",
+                                    "&amp;": "&",
+                                    "&quot;": '"',
+                                    "&#x27;": "'",
+                                    "&#x60;": "`",
+                                };
                                 Object.keys(patterns).forEach(k => {
                                     s = s.split(k).join(patterns[k]);
                                 });
