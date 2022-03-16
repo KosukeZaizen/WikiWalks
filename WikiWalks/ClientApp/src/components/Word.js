@@ -95,7 +95,9 @@ class PagesForTheTitles extends Component {
                 {" are introduced."}
             </div>
         );
-        const showAd = pages && pages.length > 50;
+
+        const showAd = false; // Disable google adsense
+        // const showAd = pages && pages.length > 50;
 
         return (
             <div>
@@ -660,6 +662,8 @@ function renderTable(pages, wordId, word) {
 }
 
 function AdBetweenTables() {
+    return null; // Disable google adsense
+
     return (
         <div style={{ padding: "15px 0" }}>
             <p style={{ margin: 0, fontSize: "small", fontWeight: "bold" }}>
